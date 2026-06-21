@@ -24,11 +24,11 @@ command -v systemctl >/dev/null || fail "systemd is required."
 install_packages() {
   if command -v apt-get >/dev/null; then
     apt-get update -y
-    DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates curl tar
+    DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates curl
   elif command -v dnf >/dev/null; then
-    dnf install -y ca-certificates curl tar
+    dnf install -y ca-certificates curl
   elif command -v yum >/dev/null; then
-    yum install -y ca-certificates curl tar
+    yum install -y ca-certificates curl
   else
     fail "Supported package manager not found (apt, dnf, or yum)."
   fi
@@ -40,34 +40,6 @@ detect_arch() {
     aarch64|arm64) printf 'arm64' ;;
     *) fail "Unsupported CPU architecture: $(uname -m)" ;;
   esac
-}
-
-install_go() {
-  local go_release="1.26.4"
-  local go_arch="$1"
-  local go_sha256=""
-  case "$go_arch" in
-    amd64) go_sha256="1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f" ;;
-    arm64) go_sha256="ef758ae7c6cf9267c9c0ef080b8965f453d89ab2d25d9eb22de4405925238768" ;;
-  esac
-  local archive="$TMP_DIR/go.tar.gz"
-  info "Installing Go ${go_release} from the official distribution..."
-  curl --fail --location --retry 3 \
-    "https://go.dev/dl/go${go_release}.linux-${go_arch}.tar.gz" -o "$archive"
-  printf '%s  %s\n' "$go_sha256" "$archive" | sha256sum --check --status ||
-    fail "Go archive checksum verification failed."
-  rm -rf -- /usr/local/go
-  tar -C /usr/local -xzf "$archive"
-  export PATH="/usr/local/go/bin:$PATH"
-}
-
-go_is_compatible() {
-  command -v go >/dev/null || return 1
-  local version major minor
-  version="$(go env GOVERSION | sed 's/^go//')"
-  major="$(printf '%s' "$version" | cut -d. -f1)"
-  minor="$(printf '%s' "$version" | cut -d. -f2)"
-  (( major > 1 || (major == 1 && minor >= 24) ))
 }
 
 download_release_binary() {
@@ -93,23 +65,6 @@ download_release_binary() {
   [[ "$actual" == "$expected" ]] || fail "Farstar binary checksum verification failed."
   chmod 0755 "$TMP_DIR/farstar"
   return 0
-}
-
-build_from_github() {
-  local arch="$1"
-  info "No published release was found; building the latest source from GitHub..."
-  if ! go_is_compatible; then
-    install_go "$arch"
-  fi
-  curl --fail --location --retry 3 \
-    "https://github.com/${REPO}/archive/refs/heads/main.tar.gz" -o "$TMP_DIR/source.tar.gz"
-  mkdir -p "$TMP_DIR/source"
-  tar -C "$TMP_DIR/source" --strip-components=1 -xzf "$TMP_DIR/source.tar.gz"
-  (
-    cd "$TMP_DIR/source"
-    GOTOOLCHAIN=local CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$TMP_DIR/farstar" ./cmd/farstar
-  )
-  chmod 0755 "$TMP_DIR/farstar"
 }
 
 validate_port() {
@@ -198,11 +153,8 @@ main() {
     info "Existing Farstar data detected; configuration will be preserved."
   fi
 
-  if ! download_release_binary "$arch"; then
-    [[ -z "${FARSTAR_VERSION:-}" ]] ||
-      fail "Requested release ${FARSTAR_VERSION} could not be downloaded."
-    build_from_github "$arch"
-  fi
+  download_release_binary "$arch" ||
+    fail "No installable GitHub Release was found. Publish a release containing farstar-linux-amd64, farstar-linux-arm64, and SHA256SUMS."
   install -m 0755 "$TMP_DIR/farstar" "$BIN_PATH"
 
   if ! getent group farstar >/dev/null; then groupadd --system farstar; fi

@@ -69,6 +69,9 @@ bash <(curl -fsSL https://raw.githubusercontent.com/farstar-team/panel/main/inst
 5. دیتابیس و master key را در `/etc/farstar` ایجاد می‌کند.
 6. سرویس systemd را فعال می‌کند.
 
+نصب به یک GitHub Release معتبر نیاز دارد و برای پایداری، روی سرور مقصد
+سورس را build یا ابزار Go را دانلود نمی‌کند.
+
 در نصب اولیه پورت پنل، آدرس bind، نام کاربری و رمز مدیر پرسیده می‌شود.
 
 ### دسترسی امن پیش‌فرض
