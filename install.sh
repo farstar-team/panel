@@ -59,7 +59,10 @@ download_release_binary() {
   info "Downloading Farstar ${tag} for linux/${arch}..."
   curl --fail --location --retry 3 "${base}/${asset}" -o "$TMP_DIR/farstar" || return 1
   curl --fail --location --retry 3 "${base}/${checksums}" -o "$TMP_DIR/SHA256SUMS" || return 1
-  expected="$(awk -v file="$asset" '$2 == file {print $1}' "$TMP_DIR/SHA256SUMS")"
+  expected="$(
+    tr -d '\r' < "$TMP_DIR/SHA256SUMS" |
+      awk -v file="$asset" '$2 == file {print $1; exit}'
+  )"
   [[ "$expected" =~ ^[a-fA-F0-9]{64}$ ]] || fail "Release checksum is missing or invalid."
   actual="$(sha256sum "$TMP_DIR/farstar" | awk '{print $1}')"
   [[ "$actual" == "$expected" ]] || fail "Farstar binary checksum verification failed."
