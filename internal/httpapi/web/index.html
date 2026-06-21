@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>فارستار تانل پنل</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div id="login-view" class="login-shell hidden">
+    <section class="login-card">
+      <div class="brand-mark large"><span>F</span></div>
+      <p class="eyebrow">FARSTAR NETWORK</p>
+      <h1>فارستار تانل پنل</h1>
+      <p class="muted">مرکز فرمان امن و سریع برای تانل‌های شما</p>
+      <form id="login-form">
+        <label>نام کاربری<input id="login-user" autocomplete="username" required></label>
+        <label>رمز عبور<input id="login-pass" type="password" autocomplete="current-password" required></label>
+        <button class="primary wide" type="submit"><span>ورود به مرکز فرمان</span><b>←</b></button>
+      </form>
+      <p id="login-error" class="form-error"></p>
+    </section>
+    <div class="login-visual">
+      <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+      <div class="planet"><span></span></div>
+      <div class="signal s1"></div><div class="signal s2"></div><div class="signal s3"></div>
+      <p>مسیر پایدار؛ کنترل کامل.</p>
+    </div>
+  </div>
+
+  <div id="app" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><span>F</span></div>
+        <div><strong>فارستار</strong><small>TUNNEL PANEL</small></div>
+      </div>
+      <nav>
+        <button class="nav-item active" data-view="dashboard"><i>◈</i><span>نمای کلی</span></button>
+        <button class="nav-item" data-view="tunnels"><i>↯</i><span>تانل‌ها</span><em id="nav-count">0</em></button>
+        <button class="nav-item" data-view="activity"><i>⌁</i><span>رویدادها</span></button>
+        <button class="nav-item" data-view="settings"><i>⚙</i><span>تنظیمات</span></button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="security-note"><span>●</span><div><b>هسته امن</b><small>AES-256 + HMAC</small></div></div>
+        <button id="logout-btn" class="ghost wide">خروج از پنل</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <button id="menu-btn" class="icon mobile-only">☰</button>
+          <p class="eyebrow">CONTROL CENTER</p>
+          <h2 id="page-title">نمای کلی شبکه</h2>
+        </div>
+        <div class="top-actions">
+          <div class="live-pill"><span></span> پایش زنده</div>
+          <button id="theme-btn" class="icon" title="تغییر پوسته">◐</button>
+          <button id="new-tunnel-top" class="primary">＋ تانل جدید</button>
+        </div>
+      </header>
+
+      <section id="dashboard-view" class="view">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">NETWORK PULSE</p>
+            <h3>شبکه‌ات زیر نظر توست.</h3>
+            <p>وضعیت تمام مسیرها، ترافیک و اتصال‌ها را در یک نگاه ببین.</p>
+          </div>
+          <div class="hero-orb"><span id="health-percent">100%</span><small>سلامت شبکه</small></div>
+        </div>
+        <div class="stat-grid">
+          <article class="stat-card violet"><div class="stat-icon">↯</div><div><span>تانل فعال</span><strong id="active-tunnels">0</strong><small id="total-tunnels">از ۰ تانل</small></div></article>
+          <article class="stat-card cyan"><div class="stat-icon">⇅</div><div><span>ترافیک کل</span><strong id="total-traffic">0 B</strong><small>از زمان آخرین اجرا</small></div></article>
+          <article class="stat-card green"><div class="stat-icon">◎</div><div><span>اتصال زنده</span><strong id="active-connections">0</strong><small>هم‌اکنون</small></div></article>
+          <article class="stat-card amber"><div class="stat-icon">▣</div><div><span>حافظه پنل</span><strong id="memory-use">0 MB</strong><small id="panel-uptime">آپ‌تایم ۰ ثانیه</small></div></article>
+        </div>
+        <div class="dashboard-grid">
+          <article class="panel traffic-panel">
+            <div class="panel-head"><div><p class="eyebrow">THROUGHPUT</p><h3>نبض ترافیک</h3></div><div class="legend"><span class="in">ورودی</span><span class="out">خروجی</span></div></div>
+            <canvas id="traffic-chart"></canvas>
+          </article>
+          <article class="panel quick-panel">
+            <div class="panel-head"><div><p class="eyebrow">QUICK ACTIONS</p><h3>دسترسی سریع</h3></div></div>
+            <button id="quick-new"><span class="quick-icon">＋</span><div><b>ساخت تانل جدید</b><small>TCP یا WSS ریورس</small></div><i>←</i></button>
+            <button id="quick-backup"><span class="quick-icon">↓</span><div><b>دریافت بکاپ</b><small>تنظیمات و رازهای رمزگشایی‌شده</small></div><i>←</i></button>
+            <button id="quick-logs"><span class="quick-icon">⌁</span><div><b>مشاهده رویدادها</b><small>آخرین اتفاق‌های شبکه</small></div><i>←</i></button>
+          </article>
+        </div>
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">TUNNEL STATUS</p><h3>مسیرهای اخیر</h3></div><button class="link-btn" data-goto="tunnels">مشاهده همه ←</button></div>
+          <div id="recent-tunnels" class="tunnel-list compact"></div>
+        </article>
+      </section>
+
+      <section id="tunnels-view" class="view hidden">
+        <div class="section-actions">
+          <div class="search"><span>⌕</span><input id="search-input" placeholder="جست‌وجوی نام، پروتکل یا آدرس..."></div>
+          <button id="new-tunnel-btn" class="primary">＋ ساخت تانل</button>
+        </div>
+        <div id="tunnel-list" class="tunnel-list"></div>
+        <div id="empty-state" class="empty hidden"><div>↯</div><h3>هنوز مسیری ساخته نشده</h3><p>اولین تانل فارستار را بساز و شبکه را روشن کن.</p><button class="primary">ساخت اولین تانل</button></div>
+      </section>
+
+      <section id="activity-view" class="view hidden">
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">LIVE ACTIVITY</p><h3>رویدادهای پنل</h3></div><button id="clear-activity" class="ghost">پاک‌کردن نمایش</button></div>
+          <div id="activity-list" class="activity-list"></div>
+        </article>
+      </section>
+
+      <section id="settings-view" class="view hidden">
+        <div class="settings-grid">
+          <article class="panel setting-card"><span>◐</span><div><h3>ظاهر پنل</h3><p>پوسته روشن یا تاریک روی همین مرورگر ذخیره می‌شود.</p></div><button id="setting-theme" class="ghost">تغییر پوسته</button></article>
+          <article class="panel setting-card"><span>↓</span><div><h3>پشتیبان تنظیمات</h3><p>فایل بکاپ شامل رازهای تانل است؛ آن را در محل امن نگه‌دار.</p></div><button id="setting-backup" class="ghost">دریافت فایل</button></article>
+          <article class="panel setting-card warning"><span>!</span><div><h3>امنیت دسترسی</h3><p>برای محیط عملیاتی پنل را پشت HTTPS یا reverse proxy قرار بده.</p></div><div class="badge">پیشنهاد مهم</div></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-backdrop" data-close-modal></div>
+    <section class="modal-card">
+      <header><div><p class="eyebrow">TUNNEL BUILDER</p><h3 id="modal-title">ساخت تانل جدید</h3></div><button class="icon" data-close-modal>×</button></header>
+      <form id="tunnel-form">
+        <input id="tunnel-id" type="hidden">
+        <div class="form-grid">
+          <label class="span-2">نام مسیر<input id="t-name" required maxlength="60" placeholder="مثلاً ایران به آلمان"></label>
+          <label>نقش<select id="t-role"><option value="server">سرور خارج</option><option value="client">کلاینت ایران</option></select></label>
+          <label>پروتکل<select id="t-protocol"><option value="tcp">TCP Mux</option><option value="wss">WSS Mux</option></select></label>
+          <label id="listen-field">آدرس شنود<input id="t-listen" placeholder="0.0.0.0:443"></label>
+          <label id="remote-field" class="hidden">آدرس سرور<input id="t-remote" placeholder="1.2.3.4:443 یا wss://domain/tunnel"></label>
+          <label class="span-2" id="public-field">پورت‌های عمومی<textarea id="t-public" rows="2" placeholder="0.0.0.0:8000&#10;0.0.0.0:8001"></textarea><small>هر آدرس در یک خط</small></label>
+          <label class="span-2 hidden" id="local-field">سرویس‌های محلی<textarea id="t-local" rows="2" placeholder="127.0.0.1:3000&#10;127.0.0.1:3001"></textarea><small>ترتیب سرویس‌ها باید با پورت‌های سرور یکسان باشد.</small></label>
+          <label class="span-2">راز مشترک<input id="t-secret" type="password" minlength="16" placeholder="در ساخت خالی بگذار تا خودکار تولید شود"><small>در ویرایش، خالی ماندن یعنی بدون تغییر.</small></label>
+          <div id="tls-fields" class="span-2 form-grid hidden">
+            <label>مسیر گواهی TLS<input id="t-cert" placeholder="/etc/letsencrypt/.../fullchain.pem"></label>
+            <label>مسیر کلید TLS<input id="t-key" placeholder="/etc/letsencrypt/.../privkey.pem"></label>
+            <label id="tls-name-field" class="hidden">نام دامنه TLS<input id="t-tls-name" placeholder="tunnel.example.com"></label>
+            <label id="tls-ca-field" class="hidden">مسیر CA اختصاصی<input id="t-ca" placeholder="/etc/farstar/ca.pem"></label>
+            <label id="skip-verify-field" class="check hidden"><input id="t-skip-verify" type="checkbox"><span>نادیده گرفتن اعتبارسنجی TLS <b>(ناامن)</b></span></label>
+          </div>
+          <label class="check span-2"><input id="t-autostart" type="checkbox" checked><span>اجرای خودکار پس از راه‌اندازی پنل</span></label>
+        </div>
+        <p id="form-error" class="form-error"></p>
+        <footer><button type="button" class="ghost" data-close-modal>انصراف</button><button id="save-tunnel" class="primary" type="submit">ذخیره مسیر</button></footer>
+      </form>
+    </section>
+  </div>
+
+  <div id="log-drawer" class="drawer hidden">
+    <div class="drawer-backdrop" data-close-logs></div>
+    <section><header><div><p class="eyebrow">PROCESS LOG</p><h3 id="log-title">لاگ تانل</h3></div><button class="icon" data-close-logs>×</button></header><pre id="log-content">در حال دریافت...</pre></section>
+  </div>
+  <div id="toast-root"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
