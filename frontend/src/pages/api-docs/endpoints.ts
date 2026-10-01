@@ -2783,6 +2783,8 @@ export const sections: readonly Section[] = [
   {
     id: 'store',
     title: 'FARSTAR Store',
+    description:
+      'Configure Telegram VPN sales, plans, manual-payment instructions, and support. Admin only.',
     endpoints: [
       {
         method: 'GET',
