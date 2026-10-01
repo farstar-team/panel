@@ -1,9 +1,10 @@
 package tgbot
 
 import (
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
 // userLevel decides what the bot admits to existing at all: a Telegram account
