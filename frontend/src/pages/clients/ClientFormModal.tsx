@@ -412,6 +412,7 @@ export default function ClientFormModal({
         subId: RandomUtil.randomLowerAndNum(16),
         password: RandomUtil.randomLowerAndNum(16),
         auth: RandomUtil.randomLowerAndNum(16),
+		inboundIds: inbounds.filter((ib) => ib.enable && MULTI_CLIENT_PROTOCOLS.has(ib.protocol || '')).map((ib) => ib.id),
         wgPrivateKey: wgKeypair.privateKey,
         wgPublicKey: wgKeypair.publicKey,
       });

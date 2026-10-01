@@ -133,6 +133,8 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 	if len(traffics) == 0 {
 		return nil
 	}
+	traffics, err = meteredClientTraffic(tx, traffics)
+	if err != nil { return err }
 
 	emails := make([]string, 0, len(traffics))
 	for _, traffic := range traffics {

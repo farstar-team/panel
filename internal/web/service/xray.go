@@ -448,6 +448,7 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 		injectNodeEgresses(xrayConfig, nodes)
 	}
 
+	expandMeteredRoutingUsers(xrayConfig)
 	return xrayConfig, nil
 }
 
@@ -782,7 +783,7 @@ func injectAmneziawgnetSocks(cfg *xray.Config, inbounds []*model.Inbound) {
 			Listen:   json_util.RawMessage(`"127.0.0.1"`),
 			Port:     amneziawgnet.SOCKSPortForInbound(inbound.Id),
 			Protocol: "socks",
-			Settings: json_util.RawMessage(settings),
+			Settings: json_util.RawMessage(model.MeterInboundSettings(inbound.Id, settings)),
 			Sniffing: json_util.RawMessage(amneziawgEgressSniffingSettings),
 			Tag:      inbound.Tag,
 		})
@@ -1200,6 +1201,7 @@ func (s *XrayService) GetXrayTraffic() ([]*xray.Traffic, []*xray.ClientTraffic, 
 		logger.Debug("Failed to fetch Xray traffic:", err)
 		return nil, nil, err
 	}
+	for _, row := range clientTraffic { if row != nil { row.InboundId, row.Email = xray.ParseMeterEmail(row.Email) } }
 	return traffic, clientTraffic, nil
 }
 

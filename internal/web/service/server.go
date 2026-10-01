@@ -1258,7 +1258,7 @@ func parseAccessLogFields(line string) LogEntry {
 		} else if strings.HasSuffix(part, "]") {
 			entry.Outbound = part[:len(part)-1]
 		} else if part == "email:" && i+1 < len(parts) {
-			entry.Email = parts[i+1]
+			_, entry.Email = xray.ParseMeterEmail(parts[i+1])
 		}
 	}
 

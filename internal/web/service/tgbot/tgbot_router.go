@@ -107,6 +107,7 @@ func (t *Tgbot) OnReceive() {
 			// Use goroutine with worker pool for concurrent callback processing
 			go runBotHandler(func() {
 				userStateMgr.clear(callbackActor(&query))
+				if t.handleStoreCallback(&query) { return }
 				if isAdmin, ok := t.gateCallback(&query); ok {
 					t.answerCallback(&query, isAdmin)
 				}
@@ -117,6 +118,7 @@ func (t *Tgbot) OnReceive() {
 		h.HandleMessage(func(ctx *th.Context, message telego.Message) error {
 			defer recoverBotPanic()
 			userStateMgr.maybePrune(time.Hour)
+			if t.handleStoreReceipt(&message) { return nil }
 			actor := messageActor(message)
 			if userState, exists := userStateMgr.get(actor); exists {
 				if userState == broadcastAwaitingText {
@@ -219,6 +221,7 @@ func (t *Tgbot) answerCommand(message *telego.Message, chatId int64, isAdmin boo
 	msg, onlyMessage := "", false
 
 	command, _, commandArgs := tu.ParseCommand(message.Text)
+	if t.handleStoreCommand(message, command, commandArgs, isAdmin) { return }
 
 	// Helper function to handle unknown commands.
 	handleUnknownCommand := func() {

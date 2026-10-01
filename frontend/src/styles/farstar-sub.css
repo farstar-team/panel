@@ -1,0 +1,32 @@
+.subscription-page {
+  --sub-grad-from: #23766b;
+  --sub-grad-to: #60a999;
+  --sub-ink-from: #1a6359;
+  --sub-ink-to: #23766b;
+  --sub-accent: #23766b;
+  --bg-page: #f4f6f5;
+  --sub-card-bg: #fff;
+  --sub-card-border: #e4eae7;
+  --sub-card-shadow: 0 4px 24px #17372b08;
+  --sub-blob-1: transparent;
+  --sub-blob-2: transparent;
+  --sub-grid: transparent;
+  --sub-card-sheen: none;
+  --sub-tile-bg: #f4f8f6;
+  --sub-tile-border: #e6ede9;
+}
+.subscription-page.is-dark {
+  --sub-grad-from: #61b5a5;
+  --sub-grad-to: #8fc9bb;
+  --sub-ink-from: #8fc9bb;
+  --sub-ink-to: #61b5a5;
+  --bg-page: #151a18;
+  --sub-card-bg: #1d2420;
+  --sub-card-shadow: none;
+  --sub-card-sheen: none;
+  --sub-blob-1: transparent;
+  --sub-blob-2: transparent;
+  --sub-grid: transparent;
+}
+.subscription-page .sub-brand-title { letter-spacing: .03em; font-weight: 600; }
+.subscription-page .sub-brand-mark { box-shadow: none; border-radius: 14px; }

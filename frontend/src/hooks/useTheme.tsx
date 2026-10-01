@@ -30,7 +30,7 @@ function applyDom(isDark: boolean, isUltra: boolean) {
 }
 
 // module load so the document is in the right theme before React mounts.
-const initialDark = readBool(STORAGE_DARK, true);
+const initialDark = readBool(STORAGE_DARK, false);
 const initialUltra = readBool(STORAGE_ULTRA, false);
 applyDom(initialDark, initialUltra);
 
@@ -93,9 +93,9 @@ const LIGHT_CONTRAST_TOKENS = {
   colorSuccessText: '#237804',
 };
 const LIGHT_BUTTON_TOKENS = {
-  colorPrimary: '#0958d9',
-  colorPrimaryHover: '#2468e5',
-  colorPrimaryActive: '#073ea8',
+  colorPrimary: '#23766b',
+  colorPrimaryHover: '#318f81',
+  colorPrimaryActive: '#185b52',
 };
 
 // hashed:false drops the `:where(.css-<hash>)` wrapper antd puts around every
@@ -117,7 +117,7 @@ export function buildAntdThemeConfig(isDark: boolean, isUltra: boolean): ThemeCo
     return {
       ...SHARED_STYLE_CONFIG,
       algorithm: antdTheme.defaultAlgorithm,
-      token: LIGHT_CONTRAST_TOKENS,
+      token: { ...LIGHT_CONTRAST_TOKENS, colorPrimary: '#23766b', colorBgLayout: '#f5f6f8', borderRadius: 10, fontFamily: 'Vazirmatn, Tahoma, sans-serif' },
       components: {
         Statistic: STATISTIC_TOKENS,
         Button: LIGHT_BUTTON_TOKENS,
@@ -127,7 +127,7 @@ export function buildAntdThemeConfig(isDark: boolean, isUltra: boolean): ThemeCo
   return {
     ...SHARED_STYLE_CONFIG,
     algorithm: antdTheme.darkAlgorithm,
-    token: isUltra ? ULTRA_DARK_TOKENS : DARK_TOKENS,
+    token: { ...(isUltra ? ULTRA_DARK_TOKENS : DARK_TOKENS), colorPrimary: '#61b5a5', borderRadius: 10, fontFamily: 'Vazirmatn, Tahoma, sans-serif' },
     components: {
       Layout: isUltra ? ULTRA_DARK_LAYOUT_TOKENS : DARK_LAYOUT_TOKENS,
       Menu: isUltra ? ULTRA_DARK_MENU_TOKENS : DARK_MENU_TOKENS,

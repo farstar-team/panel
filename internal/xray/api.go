@@ -857,7 +857,8 @@ func (x *XrayAPI) GetOnlineUsers() ([]OnlineUser, error) {
 			}
 			ips = append(ips, OnlineIP{IP: entry.GetIp(), LastSeen: entry.GetLastSeen()})
 		}
-		users = append(users, OnlineUser{Email: u.GetEmail(), IPs: ips})
+		_, email := ParseMeterEmail(u.GetEmail())
+		users = append(users, OnlineUser{Email: email, IPs: ips})
 	}
 	return users, nil
 }

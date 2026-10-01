@@ -766,9 +766,9 @@ export default function ClientsPage() {
   const onShowQr = useCallback(
     async (email: string) => {
       const row = rowsByEmail.current.get(email);
-      if (!row) return;
-      const full = await hydrate(row.email);
-      setQrClient(full ? { ...row, ...full.client, inboundIds: full.inboundIds } : row);
+      const full = await hydrate(email);
+      if (!full && !row) return;
+      setQrClient(full ? { ...row, ...full.client, inboundIds: full.inboundIds } : row!);
       setViewingTunnelAllowedIPs(full?.tunnelAllowedIPs ?? {});
       setQrOpen(true);
     },
@@ -1020,6 +1020,7 @@ export default function ClientsPage() {
           const r = await setExternalLinks(meta.email, meta.externalLinks);
           if (!r?.success) return r;
         }
+		await onShowQr(meta.email);
         return createMsg;
       }
       const updateMsg = await update(meta.email, payload);
@@ -1040,7 +1041,7 @@ export default function ClientsPage() {
       if (!r?.success) return r;
       return updateMsg;
     },
-    [create, update, attach, detach, setExternalLinks],
+    [create, update, attach, detach, setExternalLinks, onShowQr],
   );
 
   const pageClass = useMemo(() => {

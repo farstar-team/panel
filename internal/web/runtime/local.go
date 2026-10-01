@@ -249,6 +249,12 @@ func (l *Local) updateTuicInbound(ctx context.Context, oldIb, newIb *model.Inbou
 }
 
 func (l *Local) AddUser(_ context.Context, ib *model.Inbound, userMap map[string]any) error {
+	if email, ok := userMap["email"].(string); ok {
+		copyMap := make(map[string]any, len(userMap))
+		for key, value := range userMap { copyMap[key] = value }
+		copyMap["email"] = xray.MeterEmail(ib.Id, email)
+		userMap = copyMap
+	}
 	if ib.Protocol == model.MTProto || ib.Protocol == model.AmneziaWG || ib.Protocol == model.TUIC {
 		return nil
 	}
@@ -262,7 +268,7 @@ func (l *Local) RemoveUser(_ context.Context, ib *model.Inbound, email string) e
 		return nil
 	}
 	return l.withAPI(func(api *xray.XrayAPI) error {
-		return api.RemoveUser(ib.Tag, email)
+		return api.RemoveUser(ib.Tag, xray.MeterEmail(ib.Id, email))
 	})
 }
 

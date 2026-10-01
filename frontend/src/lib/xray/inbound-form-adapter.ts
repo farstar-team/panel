@@ -34,6 +34,7 @@ const XMUX_DEFAULTS = XHttpXmuxSchema.parse({});
 // POST to /panel/api/inbounds/add or /update/:id.
 
 export interface RawInboundRow {
+	trafficMultiplier?: number;
   port?: number;
   listen?: string;
   protocol?: string;
@@ -63,6 +64,7 @@ export interface RawInboundRow {
 // strings, mirroring what the Go endpoints expect (xray-core wants the
 // nested config slices as strings to round-trip through its loader).
 export interface WireInboundPayload {
+	trafficMultiplier: number;
   up: number;
   down: number;
   total: number;
@@ -221,6 +223,7 @@ export function rawInboundToFormValues(row: RawInboundRow): InboundFormValues {
     shareAddrStrategy: coerceShareAddrStrategy(row.shareAddrStrategy),
     shareAddr: row.shareAddr ?? '',
     subSortIndex: row.subSortIndex == null || row.subSortIndex === 0 ? 1 : row.subSortIndex,
+	trafficMultiplier: row.trafficMultiplier || 1,
     excludeFromSub: row.excludeFromSub ?? false,
     disableFlow: row.disableFlow ?? false,
     protocol,
@@ -403,6 +406,7 @@ export function formValuesToWirePayload(
     shareAddrStrategy: values.shareAddrStrategy,
     shareAddr: values.shareAddr,
     subSortIndex: values.subSortIndex,
+	trafficMultiplier: values.trafficMultiplier ?? 1,
     excludeFromSub: values.excludeFromSub,
     disableFlow: values.disableFlow,
   };

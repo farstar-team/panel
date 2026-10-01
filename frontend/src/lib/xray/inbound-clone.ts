@@ -33,6 +33,7 @@ export function buildClonePayload(dbInbound: DBInbound, port: number, nodeId: nu
     down: 0,
     total: 0,
     remark: `${dbInbound.remark} (clone)`,
+    trafficMultiplier: dbInbound.trafficMultiplier,
     enable: false,
     expiryTime: 0,
     listen: '',

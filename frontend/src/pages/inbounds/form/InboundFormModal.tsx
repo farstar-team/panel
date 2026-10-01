@@ -13,6 +13,7 @@ import {
   Switch,
   Tabs,
   Tooltip,
+  Typography,
   message,
 } from 'antd';
 import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
@@ -693,6 +694,10 @@ export default function InboundFormModal({
         </>
       )}
 
+      <FormField name="trafficMultiplier" label={t('farstar.trafficMultiplier')}>
+        <InputNumber min={0.01} max={100} step={0.1} />
+      </FormField>
+      <Typography.Paragraph type="secondary">{t('farstar.trafficMultiplierHelp')}</Typography.Paragraph>
       <FormField
         name="subSortIndex"
         label={labelWithHint(

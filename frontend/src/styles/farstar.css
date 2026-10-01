@@ -1,0 +1,18 @@
+body.light { background: #f5f6f8; }
+body .content-shell { max-width: 1500px; padding: 32px; }
+body.light [class$='-page'] { --bg-page: #f5f6f8; --bg-card: #fff; }
+body .ant-card { box-shadow: none !important; border: 1px solid var(--ant-color-border-secondary); }
+body .ant-card:hover { transform: none !important; }
+body .ant-card-head { border-bottom: 1px solid var(--ant-color-border-secondary); font-weight: 600; }
+body .ant-table-thead > tr > th { font-size: 12px; font-weight: 500; }
+body .ant-table-tbody > tr > td { padding-block: 16px; }
+body .ant-btn-primary { box-shadow: none; }
+body .sider-brand { height: 76px; }
+body .brand-text { letter-spacing: 2px; font-size: 15px; font-weight: 700; }
+body .ant-sidebar > .ant-layout-sider { border-inline-end: 1px solid var(--ant-color-border-secondary); }
+body .ant-sidebar:not(.sidebar-pinned) > .ant-layout-sider:not(.ant-layout-sider-collapsed) { box-shadow: 3px 0 15px #00000008; }
+body .sider-nav .ant-menu-item { margin-block: 6px; border-radius: 8px; }
+body .ant-menu-light .ant-menu-item-selected { background: #edf4f2; color: #23766b; }
+body .index-page .ant-statistic-title { font-size: 12px; }
+body .index-page .ant-statistic-content { font-size: 24px; font-weight: 600; }
+@media (max-width: 720px) { body .content-shell { padding: 18px 14px; } }

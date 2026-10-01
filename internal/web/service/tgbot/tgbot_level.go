@@ -1,6 +1,7 @@
 package tgbot
 
 import (
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 )
@@ -51,6 +52,9 @@ func commandAllowed(level userLevel, command string) bool {
 func (t *Tgbot) gateCommand(message *telego.Message) (isAdmin bool, ok bool) {
 	level := t.levelOf(message.From.ID)
 	command, _, _ := tu.ParseCommand(message.Text)
+	if (command == "shop" || command == "my") && message.Chat.ID == message.From.ID && (&service.StoreService{}).Config().Enabled {
+		return level == levelAdmin, true
+	}
 	if commandAllowed(level, command) {
 		return level == levelAdmin, true
 	}

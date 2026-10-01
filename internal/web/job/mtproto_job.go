@@ -30,8 +30,10 @@ func (j *MtprotoJob) Run() {
 	}
 
 	routedTags := make(map[string]bool)
+	inboundIDs := make(map[string]int)
 	activeTags := make([]string, 0, len(desired))
 	for _, inst := range desired {
+		inboundIDs[inst.Tag] = inst.Id
 		activeTags = append(activeTags, inst.Tag)
 		if inst.RouteThroughXray {
 			routedTags[inst.Tag] = true
@@ -51,6 +53,7 @@ func (j *MtprotoJob) Run() {
 	inboundDown := make(map[string]int64)
 	for _, d := range deltas {
 		clientTraffics = append(clientTraffics, &xray.ClientTraffic{
+			InboundId: inboundIDs[d.Tag],
 			Email: d.Email,
 			Up:    d.Up,
 			Down:  d.Down,

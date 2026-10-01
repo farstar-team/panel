@@ -1,4 +1,5 @@
 {
+  "farstar": {"trafficMultiplier":"Inbound traffic multiplier","trafficMultiplierHelp":"A multiplier of 2 charges 2 GB of shared quota for 1 GB transferred on this inbound. Other inbounds are billed at their own rate."},
   "username": "Username",
   "password": "Password",
   "login": "Log In",
