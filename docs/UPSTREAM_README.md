@@ -151,27 +151,27 @@ docker run -d --cap-add=NET_ADMIN --cap-add=NET_RAW ... ghcr.io/mhsanaei/3x-ui
 
 ## Environment Variables
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `XUI_DB_TYPE` | Database backend: `sqlite` or `postgres` | `sqlite` |
-| `XUI_DB_DSN` | PostgreSQL connection string (when `XUI_DB_TYPE=postgres`) | — |
-| `XUI_DB_FOLDER` | Directory for the SQLite database file | `/etc/x-ui` |
-| `XUI_DB_MAX_OPEN_CONNS` | Maximum open connections (PostgreSQL pool) | — |
-| `XUI_DB_MAX_IDLE_CONNS` | Maximum idle connections (PostgreSQL pool) | — |
-| `XUI_INIT_WEB_BASE_PATH` | The initial URI path for the web panel | `/` |
-| `XUI_ENABLE_FAIL2BAN` | Enable Fail2ban-based IP-limit enforcement | `true` |
-| `XUI_LOG_LEVEL` | Log verbosity (`debug`, `info`, `warning`, `error`) | `info` |
-| `XUI_DEBUG` | Enable debug mode | `false` |
-| `XUI_TUNNEL_HEALTH_MONITOR` | Enable the tunnel health monitor (probes a URL and restarts xray after repeated failures; a restart drops all clients) | `false` |
-| `XUI_TUNNEL_HEALTH_PROXY` | Proxy the probe is sent through; point it at a local xray inbound so the probe tests the tunnel (e.g. `socks5://127.0.0.1:1080`). Empty means the probe only checks host connectivity | — |
-| `XUI_TUNNEL_HEALTH_URL` | URL probed for tunnel health | `https://www.cloudflare.com/cdn-cgi/trace` |
-| `XUI_TUNNEL_HEALTH_INTERVAL` | Interval between probes | `30s` |
-| `XUI_TUNNEL_HEALTH_TIMEOUT` | Per-probe timeout | `10s` |
-| `XUI_TUNNEL_HEALTH_FAILURES` | Consecutive failures before a restart is triggered | `3` |
-| `XUI_TUNNEL_HEALTH_COOLDOWN` | Minimum delay between consecutive restarts | `5m` |
-| `NODE_TOKEN_ENCRYPTION` | Encryption at rest for node API tokens: `off`, `migration`, or `required` (note: no `XUI_` prefix) | `off` |
-| `XUI_NODE_TOKEN_KEY_FILE` | JSON keyring (mode `0600`) holding the active key id and its base64 32-byte keys | `/etc/x-ui/node_token_key.json` |
-| `XUI_NODE_TOKEN_KEY` | A single base64 32-byte key, used only when the key file cannot be loaded | — |
+| Variable                     | Description                                                                                                                                                                           | Default                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `XUI_DB_TYPE`                | Database backend: `sqlite` or `postgres`                                                                                                                                              | `sqlite`                                   |
+| `XUI_DB_DSN`                 | PostgreSQL connection string (when `XUI_DB_TYPE=postgres`)                                                                                                                            | —                                          |
+| `XUI_DB_FOLDER`              | Directory for the SQLite database file                                                                                                                                                | `/etc/x-ui`                                |
+| `XUI_DB_MAX_OPEN_CONNS`      | Maximum open connections (PostgreSQL pool)                                                                                                                                            | —                                          |
+| `XUI_DB_MAX_IDLE_CONNS`      | Maximum idle connections (PostgreSQL pool)                                                                                                                                            | —                                          |
+| `XUI_INIT_WEB_BASE_PATH`     | The initial URI path for the web panel                                                                                                                                                | `/`                                        |
+| `XUI_ENABLE_FAIL2BAN`        | Enable Fail2ban-based IP-limit enforcement                                                                                                                                            | `true`                                     |
+| `XUI_LOG_LEVEL`              | Log verbosity (`debug`, `info`, `warning`, `error`)                                                                                                                                   | `info`                                     |
+| `XUI_DEBUG`                  | Enable debug mode                                                                                                                                                                     | `false`                                    |
+| `XUI_TUNNEL_HEALTH_MONITOR`  | Enable the tunnel health monitor (probes a URL and restarts xray after repeated failures; a restart drops all clients)                                                                | `false`                                    |
+| `XUI_TUNNEL_HEALTH_PROXY`    | Proxy the probe is sent through; point it at a local xray inbound so the probe tests the tunnel (e.g. `socks5://127.0.0.1:1080`). Empty means the probe only checks host connectivity | —                                          |
+| `XUI_TUNNEL_HEALTH_URL`      | URL probed for tunnel health                                                                                                                                                          | `https://www.cloudflare.com/cdn-cgi/trace` |
+| `XUI_TUNNEL_HEALTH_INTERVAL` | Interval between probes                                                                                                                                                               | `30s`                                      |
+| `XUI_TUNNEL_HEALTH_TIMEOUT`  | Per-probe timeout                                                                                                                                                                     | `10s`                                      |
+| `XUI_TUNNEL_HEALTH_FAILURES` | Consecutive failures before a restart is triggered                                                                                                                                    | `3`                                        |
+| `XUI_TUNNEL_HEALTH_COOLDOWN` | Minimum delay between consecutive restarts                                                                                                                                            | `5m`                                       |
+| `NODE_TOKEN_ENCRYPTION`      | Encryption at rest for node API tokens: `off`, `migration`, or `required` (note: no `XUI_` prefix)                                                                                    | `off`                                      |
+| `XUI_NODE_TOKEN_KEY_FILE`    | JSON keyring (mode `0600`) holding the active key id and its base64 32-byte keys                                                                                                      | `/etc/x-ui/node_token_key.json`            |
+| `XUI_NODE_TOKEN_KEY`         | A single base64 32-byte key, used only when the key file cannot be loaded                                                                                                             | —                                          |
 
 The complete list is on the [environment variables reference](https://docs.sanaei.dev/docs/reference/env-vars).
 
