@@ -1201,7 +1201,11 @@ func (s *XrayService) GetXrayTraffic() ([]*xray.Traffic, []*xray.ClientTraffic, 
 		logger.Debug("Failed to fetch Xray traffic:", err)
 		return nil, nil, err
 	}
-	for _, row := range clientTraffic { if row != nil { row.InboundId, row.Email = xray.ParseMeterEmail(row.Email) } }
+	for _, row := range clientTraffic {
+		if row != nil {
+			row.InboundId, row.Email = xray.ParseMeterEmail(row.Email)
+		}
+	}
 	return traffic, clientTraffic, nil
 }
 

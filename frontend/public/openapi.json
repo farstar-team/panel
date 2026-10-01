@@ -3153,6 +3153,12 @@
             "format": "int64",
             "type": "integer"
           },
+          "trafficMultiplier": {
+            "example": 2,
+            "maximum": 100,
+            "minimum": 0.01,
+            "type": "number"
+          },
           "trafficReset": {
             "description": "Traffic reset schedule",
             "enum": [
@@ -3198,6 +3204,7 @@
           "subSortIndex",
           "tag",
           "total",
+          "trafficMultiplier",
           "trafficReset",
           "trafficResetDay",
           "up"
@@ -5194,6 +5201,7 @@
                       "subSortIndex": 1,
                       "tag": "in-443-tcp",
                       "total": 0,
+                      "trafficMultiplier": 2,
                       "trafficReset": "never",
                       "trafficResetDay": 1,
                       "up": 0
@@ -16283,6 +16291,7 @@
                   "subSortIndex": 1,
                   "tag": "in-443-tcp",
                   "total": 0,
+                  "trafficMultiplier": 2,
                   "trafficReset": "never",
                   "trafficResetDay": 1,
                   "up": 0

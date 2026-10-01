@@ -21,7 +21,7 @@ export interface FallbackParentRef {
 }
 
 export type DBInboundInit = Partial<{
-	trafficMultiplier: number;
+  trafficMultiplier: number;
   id: number;
   userId: number;
   up: number;
@@ -71,7 +71,7 @@ export function coerceInboundJsonField(value: unknown): Record<string, unknown> 
 }
 
 export class DBInbound {
-	trafficMultiplier: number;
+  trafficMultiplier: number;
   id: number;
   userId: number;
   up: number;
@@ -104,7 +104,7 @@ export class DBInbound {
   private _clientStatsMap: Map<string, ClientStats> | null = null;
 
   constructor(data?: DBInboundInit) {
-	this.trafficMultiplier = 1;
+    this.trafficMultiplier = 1;
     this.id = 0;
     this.userId = 0;
     this.up = 0;

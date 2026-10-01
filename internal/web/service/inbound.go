@@ -1118,7 +1118,9 @@ func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, boo
 		return inbound, false, common.NewErrorf("%s inbounds cannot be assigned to a node", inbound.Protocol)
 	}
 	inbound.SubSortIndex = normalizeSubSortIndex(inbound.SubSortIndex)
-	if err := normalizeTrafficMultiplier(inbound); err != nil { return inbound, false, err }
+	if err := normalizeTrafficMultiplier(inbound); err != nil {
+		return inbound, false, err
+	}
 	if err := normalizeInboundShareAddressStrict(inbound); err != nil {
 		return inbound, false, err
 	}
@@ -1735,7 +1737,9 @@ func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, 
 		return inbound, false, err
 	}
 	inbound.SubSortIndex = normalizeSubSortIndex(inbound.SubSortIndex)
-	if err := normalizeTrafficMultiplier(inbound); err != nil { return inbound, false, err }
+	if err := normalizeTrafficMultiplier(inbound); err != nil {
+		return inbound, false, err
+	}
 
 	// Grandfather a row that was already stored incomplete so it stays editable;
 	// only a save that breaks a previously valid TLS block is refused.

@@ -54,9 +54,9 @@ func (j *MtprotoJob) Run() {
 	for _, d := range deltas {
 		clientTraffics = append(clientTraffics, &xray.ClientTraffic{
 			InboundId: inboundIDs[d.Tag],
-			Email: d.Email,
-			Up:    d.Up,
-			Down:  d.Down,
+			Email:     d.Email,
+			Up:        d.Up,
+			Down:      d.Down,
 		})
 		if !routedTags[d.Tag] {
 			inboundUp[d.Tag] += d.Up

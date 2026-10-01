@@ -3127,6 +3127,12 @@ export const SCHEMAS: Record<string, unknown> = {
         "format": "int64",
         "type": "integer"
       },
+      "trafficMultiplier": {
+        "example": 2,
+        "maximum": 100,
+        "minimum": 0.01,
+        "type": "number"
+      },
       "trafficReset": {
         "description": "Traffic reset schedule",
         "enum": [
@@ -3172,6 +3178,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subSortIndex",
       "tag",
       "total",
+      "trafficMultiplier",
       "trafficReset",
       "trafficResetDay",
       "up"

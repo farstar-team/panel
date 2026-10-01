@@ -23,7 +23,7 @@ export const StreamSettingsSchema =
 export type StreamSettings = z.infer<typeof StreamSettingsSchema>;
 
 export const InboundCoreSchema = z.object({
-	trafficMultiplier: z.number().min(0.01).max(100).default(1),
+  trafficMultiplier: z.number().min(0.01).max(100).default(1),
   id: z.number().int().optional(),
   up: z.number().int().min(0).default(0),
   down: z.number().int().min(0).default(0),

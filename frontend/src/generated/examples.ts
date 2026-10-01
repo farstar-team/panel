@@ -815,6 +815,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "subSortIndex": 1,
     "tag": "in-443-tcp",
     "total": 0,
+    "trafficMultiplier": 2,
     "trafficReset": "never",
     "trafficResetDay": 1,
     "up": 0

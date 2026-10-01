@@ -697,7 +697,9 @@ export default function InboundFormModal({
       <FormField name="trafficMultiplier" label={t('farstar.trafficMultiplier')}>
         <InputNumber min={0.01} max={100} step={0.1} />
       </FormField>
-      <Typography.Paragraph type="secondary">{t('farstar.trafficMultiplierHelp')}</Typography.Paragraph>
+      <Typography.Paragraph type="secondary">
+        {t('farstar.trafficMultiplierHelp')}
+      </Typography.Paragraph>
       <FormField
         name="subSortIndex"
         label={labelWithHint(

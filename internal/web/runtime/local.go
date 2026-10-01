@@ -251,7 +251,9 @@ func (l *Local) updateTuicInbound(ctx context.Context, oldIb, newIb *model.Inbou
 func (l *Local) AddUser(_ context.Context, ib *model.Inbound, userMap map[string]any) error {
 	if email, ok := userMap["email"].(string); ok {
 		copyMap := make(map[string]any, len(userMap))
-		for key, value := range userMap { copyMap[key] = value }
+		for key, value := range userMap {
+			copyMap[key] = value
+		}
 		copyMap["email"] = xray.MeterEmail(ib.Id, email)
 		userMap = copyMap
 	}

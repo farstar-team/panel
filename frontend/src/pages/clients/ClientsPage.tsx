@@ -1020,7 +1020,7 @@ export default function ClientsPage() {
           const r = await setExternalLinks(meta.email, meta.externalLinks);
           if (!r?.success) return r;
         }
-		await onShowQr(meta.email);
+        await onShowQr(meta.email);
         return createMsg;
       }
       const updateMsg = await update(meta.email, payload);

@@ -724,6 +724,7 @@ export interface Inbound {
   subSortIndex: number;
   tag: string;
   total: number;
+  trafficMultiplier: number;
   trafficReset: string;
   trafficResetDay: number;
   up: number;

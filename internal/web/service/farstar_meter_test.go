@@ -23,21 +23,43 @@ func TestFarstarMeterChargesOnlyTheInboundThatTransferredBytes(t *testing.T) {
 	ordinary := model.Inbound{Tag: "ordinary", Protocol: model.VLESS, Enable: true, Port: 22001, Settings: `{"clients":[]}`}
 	premium := model.Inbound{Tag: "premium", Protocol: model.VLESS, Enable: true, Port: 22002, Settings: `{"clients":[]}`}
 	for _, inbound := range []*model.Inbound{&ordinary, &premium} {
-		if err := db.Create(inbound).Error; err != nil { t.Fatal(err) }
+		if err := db.Create(inbound).Error; err != nil {
+			t.Fatal(err)
+		}
 	}
-	if err := db.Model(&premium).UpdateColumn("traffic_multiplier", 2).Error; err != nil { t.Fatal(err) }
-	if err := db.Create(&xray.ClientTraffic{Email: "shared@x", InboundId: ordinary.Id, Enable: true, Total: 10000}).Error; err != nil { t.Fatal(err) }
-	alias := func(id int) string { return fmt.Sprintf("fs.%d.%s", id, base64.RawURLEncoding.EncodeToString([]byte("shared@x"))) }
+	if err := db.Model(&premium).UpdateColumn("traffic_multiplier", 2).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Create(&xray.ClientTraffic{Email: "shared@x", InboundId: ordinary.Id, Enable: true, Total: 10000}).Error; err != nil {
+		t.Fatal(err)
+	}
+	alias := func(id int) string {
+		return fmt.Sprintf("fs.%d.%s", id, base64.RawURLEncoding.EncodeToString([]byte("shared@x")))
+	}
 	svc := &InboundService{}
 	if _, _, err := svc.AddTraffic(nil, []*xray.ClientTraffic{
 		{Email: alias(ordinary.Id), Up: 100, Down: 200},
 		{Email: alias(premium.Id), Up: 100, Down: 200},
-	}); err != nil { t.Fatal(err) }
+	}); err != nil {
+		t.Fatal(err)
+	}
 	var got xray.ClientTraffic
-	if err := db.Where("email = ?", "shared@x").First(&got).Error; err != nil { t.Fatal(err) }
-	if got.Up != 300 || got.Down != 600 { t.Fatalf("charged up/down = %d/%d; want 300/600", got.Up, got.Down) }
-	if err := db.Model(&premium).UpdateColumn("traffic_multiplier", 3).Error; err != nil { t.Fatal(err) }
-	if _, _, err := svc.AddTraffic(nil, []*xray.ClientTraffic{{Email: alias(premium.Id), Down: 100}}); err != nil { t.Fatal(err) }
-	if err := db.Where("email = ?", "shared@x").First(&got).Error; err != nil { t.Fatal(err) }
-	if got.Down != 900 { t.Fatalf("multiplier edit rewrote history: down=%d; want 900", got.Down) }
+	if err := db.Where("email = ?", "shared@x").First(&got).Error; err != nil {
+		t.Fatal(err)
+	}
+	if got.Up != 300 || got.Down != 600 {
+		t.Fatalf("charged up/down = %d/%d; want 300/600", got.Up, got.Down)
+	}
+	if err := db.Model(&premium).UpdateColumn("traffic_multiplier", 3).Error; err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := svc.AddTraffic(nil, []*xray.ClientTraffic{{Email: alias(premium.Id), Down: 100}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Where("email = ?", "shared@x").First(&got).Error; err != nil {
+		t.Fatal(err)
+	}
+	if got.Down != 900 {
+		t.Fatalf("multiplier edit rewrote history: down=%d; want 900", got.Down)
+	}
 }

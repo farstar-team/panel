@@ -118,7 +118,9 @@ func migrateInboundExcludeFromSubColumn() error {
 
 func initModels() error {
 	if db.Migrator().HasTable(&model.Inbound{}) && !db.Migrator().HasColumn(&model.Inbound{}, "TrafficMultiplier") {
-		if err := db.Migrator().AddColumn(&model.Inbound{}, "TrafficMultiplier"); err != nil { return err }
+		if err := db.Migrator().AddColumn(&model.Inbound{}, "TrafficMultiplier"); err != nil {
+			return err
+		}
 	}
 	if err := migrateClientTrafficLastSubFetchColumn(); err != nil {
 		return err

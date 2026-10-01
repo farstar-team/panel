@@ -167,7 +167,11 @@ export function useInboundColumns({
       width: 105,
       align: 'center',
       sorter: (a, b) => (a.trafficMultiplier || 1) - (b.trafficMultiplier || 1),
-      render: (_, record) => <Tag color={(record.trafficMultiplier || 1) > 1 ? 'gold' : undefined}>×{record.trafficMultiplier || 1}</Tag>,
+      render: (_, record) => (
+        <Tag color={(record.trafficMultiplier || 1) > 1 ? 'gold' : undefined}>
+          ×{record.trafficMultiplier || 1}
+        </Tag>
+      ),
     });
 
     if (hasActiveNode) {

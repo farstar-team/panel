@@ -71,7 +71,7 @@ export type ShareAddrStrategy = z.infer<typeof ShareAddrStrategySchema>;
 // Db-side fields layered on top of the xray slice. These mirror the
 // DBInbound model — they live in the SQL row, not in xray's config.
 export const InboundDbFieldsSchema = z.object({
-	trafficMultiplier: z.number().min(0.01).max(100).default(1),
+  trafficMultiplier: z.number().min(0.01).max(100).default(1),
   up: z.number().int().min(0).default(0),
   down: z.number().int().min(0).default(0),
   total: z.number().int().min(0).default(0),

@@ -28,5 +28,11 @@
   --sub-blob-2: transparent;
   --sub-grid: transparent;
 }
-.subscription-page .sub-brand-title { letter-spacing: .03em; font-weight: 600; }
-.subscription-page .sub-brand-mark { box-shadow: none; border-radius: 14px; }
+.subscription-page .sub-brand-title {
+  letter-spacing: 0.03em;
+  font-weight: 600;
+}
+.subscription-page .sub-brand-mark {
+  box-shadow: none;
+  border-radius: 14px;
+}

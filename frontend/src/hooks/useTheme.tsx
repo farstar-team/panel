@@ -117,7 +117,13 @@ export function buildAntdThemeConfig(isDark: boolean, isUltra: boolean): ThemeCo
     return {
       ...SHARED_STYLE_CONFIG,
       algorithm: antdTheme.defaultAlgorithm,
-      token: { ...LIGHT_CONTRAST_TOKENS, colorPrimary: '#23766b', colorBgLayout: '#f5f6f8', borderRadius: 10, fontFamily: 'Vazirmatn, Tahoma, sans-serif' },
+      token: {
+        ...LIGHT_CONTRAST_TOKENS,
+        colorPrimary: '#23766b',
+        colorBgLayout: '#f5f6f8',
+        borderRadius: 10,
+        fontFamily: 'Vazirmatn, Tahoma, sans-serif',
+      },
       components: {
         Statistic: STATISTIC_TOKENS,
         Button: LIGHT_BUTTON_TOKENS,
@@ -127,7 +133,12 @@ export function buildAntdThemeConfig(isDark: boolean, isUltra: boolean): ThemeCo
   return {
     ...SHARED_STYLE_CONFIG,
     algorithm: antdTheme.darkAlgorithm,
-    token: { ...(isUltra ? ULTRA_DARK_TOKENS : DARK_TOKENS), colorPrimary: '#61b5a5', borderRadius: 10, fontFamily: 'Vazirmatn, Tahoma, sans-serif' },
+    token: {
+      ...(isUltra ? ULTRA_DARK_TOKENS : DARK_TOKENS),
+      colorPrimary: '#61b5a5',
+      borderRadius: 10,
+      fontFamily: 'Vazirmatn, Tahoma, sans-serif',
+    },
     components: {
       Layout: isUltra ? ULTRA_DARK_LAYOUT_TOKENS : DARK_LAYOUT_TOKENS,
       Menu: isUltra ? ULTRA_DARK_MENU_TOKENS : DARK_MENU_TOKENS,
