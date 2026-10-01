@@ -783,7 +783,7 @@ func injectAmneziawgnetSocks(cfg *xray.Config, inbounds []*model.Inbound) {
 			Listen:   json_util.RawMessage(`"127.0.0.1"`),
 			Port:     amneziawgnet.SOCKSPortForInbound(inbound.Id),
 			Protocol: "socks",
-			Settings: json_util.RawMessage(model.MeterInboundSettings(inbound.Id, settings)),
+			Settings: json_util.RawMessage(model.MeterInboundSettings(inbound.Id, string(settings))),
 			Sniffing: json_util.RawMessage(amneziawgEgressSniffingSettings),
 			Tag:      inbound.Tag,
 		})
