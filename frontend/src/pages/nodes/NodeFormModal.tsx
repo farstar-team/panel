@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Alert,
   Button,
+  Checkbox,
   Col,
   Form,
   Input,
@@ -13,12 +14,12 @@ import {
   Switch,
   message,
 } from 'antd';
-import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { FormProvider, useWatch } from 'react-hook-form';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import type { RemoteInboundOption } from '@/api/queries/useNodeMutations';
-import type { Msg } from '@/utils';
+import { HttpUtil, type Msg } from '@/utils';
 import { NodeFormSchema, type NodeFormValues, type ProbeResult } from '@/schemas/node';
-import { FormField, rhfZodValidate } from '@/components/form/rhf';
+import { FormField, rhfZodValidate, useZodForm } from '@/components/form/rhf';
 import { useOutboundTagGroups } from '@/api/queries/useOutboundTags';
 import './NodeFormModal.css';
 
@@ -40,6 +41,16 @@ function defaultValues(): NodeFormValues {
     id: 0,
     name: '',
     remark: '',
+    region: 'abroad',
+    configureSSH: false,
+    autoInstall: false,
+    sshPort: 22,
+    sshUsername: 'root',
+    sshFingerprint: '',
+    sshPassword: '',
+    sshPrivateKey: '',
+    sshTrustConfirmed: false,
+    hasStoredSSH: false,
     scheme: 'https',
     address: '',
     port: 2053,
@@ -67,7 +78,7 @@ export default function NodeFormModal({
   onOpenChange,
 }: NodeFormModalProps) {
   const { t } = useTranslation();
-  const methods = useForm<NodeFormValues>({ defaultValues: defaultValues() });
+  const methods = useZodForm<NodeFormValues>(NodeFormSchema, { defaultValues: defaultValues() });
   const [messageApi, messageContextHolder] = message.useMessage();
 
   const [submitting, setSubmitting] = useState(false);
@@ -77,6 +88,10 @@ export default function NodeFormModal({
   const [inboundOptions, setInboundOptions] = useState<RemoteInboundOption[]>([]);
   const [testResult, setTestResult] = useState<ProbeResult | null>(null);
   const scheme = useWatch({ control: methods.control, name: 'scheme' }) ?? 'https';
+  const region = useWatch({ control: methods.control, name: 'region' });
+  const autoInstall = useWatch({ control: methods.control, name: 'autoInstall' });
+  const configureSSH = useWatch({ control: methods.control, name: 'configureSSH' });
+  const needsSSH = region === 'iran' || autoInstall || configureSSH;
   const tlsVerifyMode = useWatch({ control: methods.control, name: 'tlsVerifyMode' }) ?? 'verify';
   const inboundSyncMode = useWatch({ control: methods.control, name: 'inboundSyncMode' }) ?? 'all';
   const { data: outboundGroups } = useOutboundTagGroups({ excludeBlackhole: true });
@@ -121,6 +136,11 @@ export default function NodeFormModal({
             inboundTags: node.inboundTags ?? [],
             apiToken: '',
             hasStoredToken: node.hasApiToken ?? false,
+            configureSSH: !!node.hasSSHCredentials,
+            hasStoredSSH: !!node.hasSSHCredentials,
+            sshPassword: '',
+            sshPrivateKey: '',
+            sshTrustConfirmed: false,
           }
         : base;
     if (next.scheme === 'http') next.tlsVerifyMode = 'skip';
@@ -142,6 +162,8 @@ export default function NodeFormModal({
       id: values.id || 0,
       name: values.name.trim(),
       remark: values.remark?.trim() || '',
+      region: values.region,
+      autoInstall: mode === 'add' && values.autoInstall,
       scheme: values.scheme,
       address: values.address.trim(),
       port: values.port,
@@ -155,6 +177,16 @@ export default function NodeFormModal({
       outboundTag: values.outboundTag || '',
     };
     if (token) payload.apiToken = token;
+    if (values.configureSSH || values.region === 'iran' || values.autoInstall) {
+      payload.ssh = {
+        port: values.sshPort,
+        username: values.sshUsername.trim(),
+        fingerprint: values.sshFingerprint.trim(),
+        trustConfirmed: values.sshTrustConfirmed,
+      };
+      if (values.sshPassword) payload.ssh.password = values.sshPassword;
+      if (values.sshPrivateKey.trim()) payload.ssh.privateKey = values.sshPrivateKey;
+    }
     return payload;
   }
 
@@ -209,14 +241,14 @@ export default function NodeFormModal({
   }
 
   async function onFinish(values: NodeFormValues) {
-    const result = NodeFormSchema.safeParse(values);
-    if (!result.success) {
-      messageApi.error(t(result.error.issues[0]?.message ?? 'pages.nodes.toasts.fillRequired'));
-      return;
-    }
     setSubmitting(true);
     try {
-      const payload = buildPayload(result.data);
+      const payload = buildPayload(values);
+      if (mode === 'add' && values.autoInstall) {
+        const msg = await save(payload);
+        if (msg?.success) onOpenChange(false);
+        return;
+      }
       const test = await testConnection(payload);
       const probe = test?.success ? test.obj : null;
       if (!probe || probe.status !== 'online') {
@@ -255,6 +287,37 @@ export default function NodeFormModal({
       >
         <FormProvider {...methods}>
           <Form layout="vertical">
+            <FormField name="region" label={t('farstarNodes.region')}>
+              <Select
+                options={[
+                  { value: 'abroad', label: t('farstarNodes.abroad') },
+                  { value: 'iran', label: t('farstarNodes.iran') },
+                ]}
+              />
+            </FormField>
+            {mode === 'add' && (
+              <FormField
+                name="autoInstall"
+                valueProp="checked"
+                onAfterChange={(value) => {
+                  if (value && methods.getValues('basePath') === '/')
+                    methods.setValue('basePath', `/${crypto.randomUUID().replaceAll('-', '')}/`);
+                }}
+              >
+                <Checkbox>{t('farstarNodes.autoInstall')}</Checkbox>
+              </FormField>
+            )}
+            {autoInstall && (
+              <Alert
+                type="info"
+                showIcon
+                title={t('farstarNodes.installHelp')}
+                style={{ marginBottom: 16 }}
+              />
+            )}
+            <FormField name="configureSSH" label={t('farstarNodes.ssh')} valueProp="checked">
+              <Switch disabled={region === 'iran' || autoInstall} />
+            </FormField>
             <Row gutter={16}>
               <Col xs={24} md={12}>
                 <FormField
@@ -395,6 +458,67 @@ export default function NodeFormModal({
                 }
               />
             </FormField>
+
+            {needsSSH && (
+              <>
+                <Alert
+                  type="info"
+                  showIcon
+                  title={t('farstarNodes.secretHelp')}
+                  style={{ marginBottom: 16 }}
+                />
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <FormField name="sshUsername" label={t('username')}>
+                      <Input autoComplete="off" dir="ltr" />
+                    </FormField>
+                  </Col>
+                  <Col span={12}>
+                    <FormField name="sshPort" label="SSH Port">
+                      <InputNumber min={1} max={65535} style={{ width: '100%' }} />
+                    </FormField>
+                  </Col>
+                </Row>
+                <FormField name="sshPassword" label={t('password')}>
+                  <Input.Password autoComplete="new-password" />
+                </FormField>
+                <FormField name="sshPrivateKey" label={t('farstarNodes.privateKey')}>
+                  <Input.TextArea rows={3} dir="ltr" autoComplete="off" />
+                </FormField>
+                <FormField name="sshFingerprint" label={t('farstarNodes.fingerprint')}>
+                  <Input dir="ltr" placeholder="SHA256:…" />
+                </FormField>
+                <Button
+                  loading={fetchingPin}
+                  onClick={async () => {
+                    setFetchingPin(true);
+                    try {
+                      const values = methods.getValues();
+                      const response = await HttpUtil.post<{ fingerprint: string }>(
+                        '/panel/api/nodes/sshFingerprint',
+                        {
+                          address: values.address,
+                          port: values.sshPort,
+                          allowPrivateAddress: values.allowPrivateAddress,
+                        },
+                        { headers: { 'Content-Type': 'application/json' } },
+                      );
+                      if (response.success && response.obj) {
+                        methods.setValue('sshFingerprint', response.obj.fingerprint);
+                        methods.setValue('sshTrustConfirmed', false);
+                      }
+                    } finally {
+                      setFetchingPin(false);
+                    }
+                  }}
+                >
+                  {t('farstarNodes.fetchFingerprint')}
+                </Button>
+                <FormField name="sshTrustConfirmed" valueProp="checked">
+                  <Checkbox>{t('farstarNodes.verify')}</Checkbox>
+                </FormField>
+              </>
+            )}
 
             <FormField
               label={t('pages.nodes.outboundTag')}

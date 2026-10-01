@@ -1,10 +1,28 @@
 import { z } from 'zod';
 
+export const NodeSSHRequestSchema = z.object({
+  port: z.number().int().min(1).max(65535),
+  username: z.string(),
+  fingerprint: z.string(),
+  password: z.string().optional(),
+  privateKey: z.string().optional(),
+  trustConfirmed: z.boolean(),
+});
+
 export const NodeRecordSchema = z
   .object({
     id: z.number(),
     name: z.string().optional(),
     remark: z.string().optional(),
+    region: z.enum(['iran', 'abroad']).optional(),
+    sshPort: z.number().optional(),
+    sshUsername: z.string().optional(),
+    sshFingerprint: z.string().optional(),
+    hasSSHCredentials: z.boolean().optional(),
+    provisionStatus: z.string().optional(),
+    provisionError: z.string().optional(),
+    ssh: NodeSSHRequestSchema.optional(),
+    autoInstall: z.boolean().optional(),
     scheme: z.string().optional(),
     address: z.string().optional(),
     port: z.number().optional(),
@@ -66,6 +84,16 @@ export const NodeFormSchema = z
     id: z.number().optional(),
     name: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
     remark: z.string().optional(),
+    region: z.enum(['iran', 'abroad']).default('abroad'),
+    configureSSH: z.boolean().default(false),
+    autoInstall: z.boolean().default(false),
+    sshPort: z.number().int().min(1).max(65535).default(22),
+    sshUsername: z.string().default('root'),
+    sshFingerprint: z.string().default(''),
+    sshPassword: z.string().max(4096).default(''),
+    sshPrivateKey: z.string().max(32768).default(''),
+    sshTrustConfirmed: z.boolean().default(false),
+    hasStoredSSH: z.boolean().default(false),
     scheme: z.enum(['http', 'https']),
     address: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
     port: z.number().int().min(1).max(65535),
@@ -88,12 +116,37 @@ export const NodeFormSchema = z
     outboundTag: z.string().optional(),
   })
   .superRefine((val, ctx) => {
-    if (val.tlsVerifyMode !== 'mtls' && val.apiToken.length === 0 && !val.hasStoredToken) {
+    if (
+      !val.autoInstall &&
+      val.tlsVerifyMode !== 'mtls' &&
+      val.apiToken.length === 0 &&
+      !val.hasStoredToken
+    ) {
       ctx.addIssue({
         code: 'custom',
         path: ['apiToken'],
         message: 'pages.nodes.toasts.fillRequired',
       });
+    }
+    if (val.configureSSH || val.region === 'iran' || val.autoInstall) {
+      if (
+        !val.sshUsername ||
+        !/^SHA256:[A-Za-z0-9+/]{43}$/.test(val.sshFingerprint) ||
+        (!val.hasStoredSSH && !val.sshPassword && !val.sshPrivateKey)
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['sshFingerprint'],
+          message: 'pages.nodes.toasts.fillRequired',
+        });
+      }
+      if ((!val.hasStoredSSH || val.sshPassword || val.sshPrivateKey) && !val.sshTrustConfirmed) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['sshTrustConfirmed'],
+          message: 'farstarNodes.verify',
+        });
+      }
     }
   });
 

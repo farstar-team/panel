@@ -13,6 +13,13 @@ type NodeView struct {
 	Id                  int      `json:"id" example:"1"`
 	Name                string   `json:"name" example:"edge-1"`
 	Remark              string   `json:"remark" example:"Primary edge"`
+	Region              string   `json:"region" example:"iran"`
+	SSHPort             int      `json:"sshPort" example:"22"`
+	SSHUsername         string   `json:"sshUsername" example:"root"`
+	SSHFingerprint      string   `json:"sshFingerprint"`
+	HasSSHCredentials   bool     `json:"hasSSHCredentials"`
+	ProvisionStatus     string   `json:"provisionStatus"`
+	ProvisionError      string   `json:"provisionError"`
 	Scheme              string   `json:"scheme" example:"https"`
 	Address             string   `json:"address" example:"node.example.com"`
 	Port                int      `json:"port" example:"2053"`
@@ -61,6 +68,13 @@ func toNodeView(n *model.Node) *NodeView {
 		Id:                  n.Id,
 		Name:                n.Name,
 		Remark:              n.Remark,
+		Region:              n.Region,
+		SSHPort:             n.SSHPort,
+		SSHUsername:         n.SSHUsername,
+		SSHFingerprint:      n.SSHFingerprint,
+		HasSSHCredentials:   n.SSHPassword != "" || n.SSHPrivateKey != "",
+		ProvisionStatus:     n.ProvisionStatus,
+		ProvisionError:      n.ProvisionError,
 		Scheme:              n.Scheme,
 		Address:             n.Address,
 		Port:                n.Port,
@@ -114,22 +128,25 @@ func toNodeViews(nodes []*model.Node) []*NodeView {
 // only as input. On update, nil means keep the stored token; replacement and
 // clearing are explicit and mutually exclusive.
 type NodeMutationRequest struct {
-	Id                  int      `json:"id" form:"id"`
-	Name                string   `json:"name" form:"name" validate:"required"`
-	Remark              string   `json:"remark" form:"remark"`
-	Scheme              string   `json:"scheme" form:"scheme" validate:"omitempty,oneof=http https"`
-	Address             string   `json:"address" form:"address" validate:"required"`
-	Port                int      `json:"port" form:"port" validate:"gte=1,lte=65535"`
-	BasePath            string   `json:"basePath" form:"basePath"`
-	ApiToken            *string  `json:"apiToken,omitempty" form:"apiToken"`
-	ClearApiToken       bool     `json:"clearApiToken,omitempty" form:"clearApiToken"`
-	Enable              bool     `json:"enable" form:"enable"`
-	AllowPrivateAddress bool     `json:"allowPrivateAddress" form:"allowPrivateAddress"`
-	TlsVerifyMode       string   `json:"tlsVerifyMode" form:"tlsVerifyMode" validate:"omitempty,oneof=verify skip pin mtls"`
-	PinnedCertSha256    string   `json:"pinnedCertSha256" form:"pinnedCertSha256"`
-	InboundSyncMode     string   `json:"inboundSyncMode" form:"inboundSyncMode" validate:"omitempty,oneof=all selected"`
-	InboundTags         []string `json:"inboundTags" form:"inboundTags"`
-	OutboundTag         string   `json:"outboundTag" form:"outboundTag"`
+	Id                  int             `json:"id" form:"id"`
+	Name                string          `json:"name" form:"name" validate:"required"`
+	Remark              string          `json:"remark" form:"remark"`
+	Region              string          `json:"region" validate:"omitempty,oneof=iran abroad"`
+	SSH                 *NodeSSHRequest `json:"ssh,omitempty"`
+	AutoInstall         bool            `json:"autoInstall"`
+	Scheme              string          `json:"scheme" form:"scheme" validate:"omitempty,oneof=http https"`
+	Address             string          `json:"address" form:"address" validate:"required"`
+	Port                int             `json:"port" form:"port" validate:"gte=1,lte=65535"`
+	BasePath            string          `json:"basePath" form:"basePath"`
+	ApiToken            *string         `json:"apiToken,omitempty" form:"apiToken"`
+	ClearApiToken       bool            `json:"clearApiToken,omitempty" form:"clearApiToken"`
+	Enable              bool            `json:"enable" form:"enable"`
+	AllowPrivateAddress bool            `json:"allowPrivateAddress" form:"allowPrivateAddress"`
+	TlsVerifyMode       string          `json:"tlsVerifyMode" form:"tlsVerifyMode" validate:"omitempty,oneof=verify skip pin mtls"`
+	PinnedCertSha256    string          `json:"pinnedCertSha256" form:"pinnedCertSha256"`
+	InboundSyncMode     string          `json:"inboundSyncMode" form:"inboundSyncMode" validate:"omitempty,oneof=all selected"`
+	InboundTags         []string        `json:"inboundTags" form:"inboundTags"`
+	OutboundTag         string          `json:"outboundTag" form:"outboundTag"`
 }
 
 func (r *NodeMutationRequest) validateCredentials(create bool) error {
@@ -167,6 +184,7 @@ func (r *NodeMutationRequest) toNode() *model.Node {
 		Id:                  r.Id,
 		Name:                r.Name,
 		Remark:              r.Remark,
+		Region:              r.Region,
 		Scheme:              r.Scheme,
 		Address:             r.Address,
 		Port:                r.Port,
@@ -181,6 +199,17 @@ func (r *NodeMutationRequest) toNode() *model.Node {
 	}
 	if r.ApiToken != nil {
 		n.ApiToken = *r.ApiToken
+	}
+	if r.SSH != nil {
+		n.SSHPort = r.SSH.Port
+		n.SSHUsername = r.SSH.Username
+		n.SSHFingerprint = r.SSH.Fingerprint
+		if r.SSH.Password != nil {
+			n.SSHPassword = *r.SSH.Password
+		}
+		if r.SSH.PrivateKey != nil {
+			n.SSHPrivateKey = *r.SSH.PrivateKey
+		}
 	}
 	return n
 }

@@ -38,6 +38,7 @@ func (a *NodeController) initRouter(g *gin.RouterGroup) {
 
 	g.POST("/test", a.test)
 	g.POST("/certFingerprint", a.certFingerprint)
+	g.POST("/sshFingerprint", a.sshFingerprint)
 	g.POST("/inbounds", a.inbounds)
 	g.POST("/probe/:id", a.probe)
 	g.POST("/updatePanel", a.updatePanel)
@@ -45,6 +46,15 @@ func (a *NodeController) initRouter(g *gin.RouterGroup) {
 	g.POST("/mtls/ca", a.mtlsCa)
 	g.POST("/mtls/trustCA", a.setMtlsTrustCA)
 	g.POST("/mtls/reloadClient", a.reloadMtlsClient)
+}
+
+func (a *NodeController) sshFingerprint(c *gin.Context) {
+	req, ok := middleware.BindAndValidate[service.NodeSSHProbeRequest](c)
+	if !ok {
+		return
+	}
+	value, err := a.nodeService.SSHFingerprint(c.Request.Context(), req)
+	jsonObj(c, value, err)
 }
 
 // reloadMtlsClient validates the credential currently stored by the master and
@@ -142,6 +152,11 @@ func (a *NodeController) ensureReachable(c *gin.Context, n *service.NodeMutation
 func (a *NodeController) add(c *gin.Context) {
 	n, ok := middleware.BindAndValidate[service.NodeMutationRequest](c)
 	if !ok {
+		return
+	}
+	if n.AutoInstall {
+		view, err := a.nodeService.StartAutomaticInstall(n)
+		jsonMsgObj(c, I18nWeb(c, "install"), view, err)
 		return
 	}
 	if n.OutboundTag == "" {

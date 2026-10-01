@@ -93,9 +93,9 @@ const LIGHT_CONTRAST_TOKENS = {
   colorSuccessText: '#237804',
 };
 const LIGHT_BUTTON_TOKENS = {
-  colorPrimary: '#23766b',
-  colorPrimaryHover: '#318f81',
-  colorPrimaryActive: '#185b52',
+  colorPrimary: '#245dff',
+  colorPrimaryHover: '#4778ff',
+  colorPrimaryActive: '#1742c7',
 };
 
 // hashed:false drops the `:where(.css-<hash>)` wrapper antd puts around every
@@ -119,7 +119,7 @@ export function buildAntdThemeConfig(isDark: boolean, isUltra: boolean): ThemeCo
       algorithm: antdTheme.defaultAlgorithm,
       token: {
         ...LIGHT_CONTRAST_TOKENS,
-        colorPrimary: '#23766b',
+        colorPrimary: '#245dff',
         colorBgLayout: '#f5f6f8',
         borderRadius: 10,
         fontFamily: 'Vazirmatn, Tahoma, sans-serif',
@@ -135,7 +135,7 @@ export function buildAntdThemeConfig(isDark: boolean, isUltra: boolean): ThemeCo
     algorithm: antdTheme.darkAlgorithm,
     token: {
       ...(isUltra ? ULTRA_DARK_TOKENS : DARK_TOKENS),
-      colorPrimary: '#61b5a5',
+      colorPrimary: '#8babff',
       borderRadius: 10,
       fontFamily: 'Vazirmatn, Tahoma, sans-serif',
     },

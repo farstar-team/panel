@@ -117,6 +117,15 @@ func migrateInboundExcludeFromSubColumn() error {
 }
 
 func initModels() error {
+	if db.Migrator().HasTable(&model.Node{}) {
+		for _, field := range []string{"Region", "SSHPort", "SSHUsername", "SSHFingerprint", "SSHPassword", "SSHPrivateKey", "ProvisionStatus", "ProvisionError"} {
+			if !db.Migrator().HasColumn(&model.Node{}, field) {
+				if err := db.Migrator().AddColumn(&model.Node{}, field); err != nil {
+					return err
+				}
+			}
+		}
+	}
 	if db.Migrator().HasTable(&model.Inbound{}) && !db.Migrator().HasColumn(&model.Inbound{}, "TrafficMultiplier") {
 		if err := db.Migrator().AddColumn(&model.Inbound{}, "TrafficMultiplier"); err != nil {
 			return err

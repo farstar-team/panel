@@ -1,10 +1,22 @@
-import { afterEach, vi } from 'vitest';
+import { afterAll, afterEach, vi } from 'vitest';
 import { act, cleanup } from '@testing-library/react';
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { message, notification } from 'antd';
+import { actDestroy as resetMessage } from 'antd/es/message';
+import { actDestroy as resetNotification } from 'antd/es/notification';
+import { unmount } from '@rc-component/util';
 
 import enUS from '../../../internal/web/translation/en-US.json';
+
+// Static AntD notices own detached React roots outside Testing Library's registry.
+const detachedContainers = new Set<DocumentFragment>();
+const createDocumentFragment = document.createDocumentFragment.bind(document);
+document.createDocumentFragment = () => {
+  const fragment = createDocumentFragment();
+  detachedContainers.add(fragment);
+  return fragment;
+};
 
 // RTL sets this from a global beforeAll, which never runs with `globals: false`.
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -89,10 +101,24 @@ afterEach(async () => {
     cleanup();
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
+  await act(async () => {
+    for (const container of detachedContainers) await unmount(container);
+    detachedContainers.clear();
+    resetMessage();
+    resetNotification();
+  });
   for (let i = 0; i < 3; i += 1) {
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
   document.body.innerHTML = '';
+});
+
+afterAll(async () => {
+  await act(async () => {
+    for (const container of detachedContainers) await unmount(container);
+    detachedContainers.clear();
+  });
+  document.createDocumentFragment = createDocumentFragment;
 });
 
 import { HttpUtil, Msg } from '@/utils';

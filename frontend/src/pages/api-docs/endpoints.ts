@@ -1739,6 +1739,18 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/nodes/sshFingerprint',
+        summary:
+          'Read the SSH host fingerprint without sending credentials. Compare it with the server console before explicitly trusting it.',
+        params: [
+          { name: 'address', in: 'body (json)', type: 'string' },
+          { name: 'port', in: 'body (json)', type: 'integer' },
+          { name: 'allowPrivateAddress', in: 'body (json)', type: 'boolean', optional: true },
+        ],
+        responseSchema: 'NodeSSHFingerprint',
+      },
+      {
+        method: 'POST',
         path: '/panel/api/nodes/certFingerprint',
         summary:
           "Connect to the node over HTTPS without verifying its certificate and return the leaf certificate's SHA-256 (base64). Used by the Add/Edit Node dialog to fetch and pin a self-signed certificate. Uses the same body as /test.",
@@ -2768,6 +2780,43 @@ export const sections: readonly Section[] = [
     ],
   },
 
+  {
+    id: 'store',
+    title: 'FARSTAR Store',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/store/state',
+        summary: 'Read store settings and all plans, including disabled plans. Admin only.',
+        responseSchema: 'StoreAdminState',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/store/settings',
+        summary:
+          'Configure sales, payment text and Telegram support URL. Enabling requires bot, subscription, payment and an active plan.',
+        params: [
+          { name: 'enabled', in: 'body (json)', type: 'boolean' },
+          { name: 'paymentText', in: 'body (json)', type: 'string' },
+          { name: 'supportURL', in: 'body (json)', type: 'string', optional: true },
+        ],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/store/plan',
+        summary:
+          'Create (id=0) or edit a plan. Existing orders retain their original price, quota and duration.',
+        params: [
+          { name: 'id', in: 'body (json)', type: 'integer', optional: true },
+          { name: 'name', in: 'body (json)', type: 'string' },
+          { name: 'price', in: 'body (json)', type: 'integer', desc: 'Price in toman.' },
+          { name: 'quotaBytes', in: 'body (json)', type: 'integer' },
+          { name: 'days', in: 'body (json)', type: 'integer' },
+          { name: 'enabled', in: 'body (json)', type: 'boolean' },
+        ],
+      },
+    ],
+  },
   {
     id: 'websocket',
     title: 'WebSocket',

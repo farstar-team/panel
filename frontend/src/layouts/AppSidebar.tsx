@@ -1,564 +1,264 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ComponentType, CSSProperties } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Drawer, Layout, Menu, Tooltip } from 'antd';
+import { Drawer, Menu } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   ApiOutlined,
   ApartmentOutlined,
-  CloseOutlined,
   CloudServerOutlined,
   ClusterOutlined,
   CodeOutlined,
-  CrownOutlined,
   DashboardOutlined,
   DatabaseOutlined,
   DiscordOutlined,
   ExportOutlined,
   GithubOutlined,
   GlobalOutlined,
-  HeartOutlined,
   ImportOutlined,
   LogoutOutlined,
   MailOutlined,
   MenuOutlined,
   MessageOutlined,
-  MoonFilled,
   MoonOutlined,
-  PushpinFilled,
-  PushpinOutlined,
   ReadOutlined,
   SafetyOutlined,
-  SearchOutlined,
   SettingOutlined,
   SunOutlined,
   SwapOutlined,
   TagsOutlined,
   TeamOutlined,
   ToolOutlined,
+  ShopOutlined,
 } from '@ant-design/icons';
 
 import { HttpUtil } from '@/utils';
 import { formatPanelVersion } from '@/lib/panel-version';
-import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
+import { useTheme } from '@/hooks/useTheme';
 import { useAllSettings } from '@/api/queries/useAllSettings';
-import { useCommandPalette } from '@/components/command-palette/useCommandPalette';
-import SponsorSlot from '@/components/sponsor/SponsorSlot';
 import './AppSidebar.css';
 
-const DONATE_URL = 'https://donate.sanaei.dev/';
-// The palette listens for Ctrl as well as Cmd, so the chip must not show a
-// Mac glyph to the Linux and Windows operators who are most of this panel's.
-const SHORTCUT_MODIFIER = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? '⌘' : 'Ctrl';
 const DOCS_URL = 'https://github.com/farstar-team/panel/blob/main/docs/FARSTAR_FA.md';
 const REPO_URL = 'https://github.com/farstar-team/panel';
-const LOGOUT_KEY = '__logout__';
-const RAIL_WIDTH = 72;
-const SIDER_WIDTH = 220;
-const SIDEBAR_PINNED_KEY = 'sidebar-pinned';
-
-let hoveredAcrossRemounts = false;
-
-type IconName =
-  | 'dashboard'
-  | 'inbound'
-  | 'team'
-  | 'groups'
-  | 'setting'
-  | 'tool'
-  | 'cluster'
-  | 'hosts'
-  | 'logout'
-  | 'sponsors'
-  | 'apidocs'
-  | 'outbound'
-  | 'routing';
-
-const iconByName: Record<IconName, ComponentType> = {
-  dashboard: DashboardOutlined,
-  inbound: ImportOutlined,
-  team: TeamOutlined,
-  groups: TagsOutlined,
-  setting: SettingOutlined,
-  tool: ToolOutlined,
-  cluster: ClusterOutlined,
-  hosts: GlobalOutlined,
-  logout: LogoutOutlined,
-  sponsors: CrownOutlined,
-  apidocs: ApiOutlined,
-  outbound: ExportOutlined,
-  routing: SwapOutlined,
-};
-
-function DonateButton({ ariaLabel }: { ariaLabel: string }) {
-  return (
-    <a
-      href={DONATE_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="sidebar-donate"
-      aria-label={ariaLabel}
-      title={ariaLabel}
-    >
-      <HeartOutlined />
-    </a>
-  );
-}
-
-function DocsButton({ ariaLabel }: { ariaLabel: string }) {
-  return (
-    <a
-      href={DOCS_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="sidebar-docs"
-      aria-label={ariaLabel}
-      title={ariaLabel}
-    >
-      <ReadOutlined />
-    </a>
-  );
-}
-
-function VersionBadge({ version, collapsed }: { version: string; collapsed?: boolean }) {
-  if (!version) return null;
-  const label = formatPanelVersion(version);
-  return (
-    <a
-      href={REPO_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="sider-version"
-      aria-label={`GitHub ${label}`}
-      title={label}
-    >
-      <GithubOutlined />
-      {!collapsed && <span className="sider-version-text">{label}</span>}
-    </a>
-  );
-}
-
-function ThemeCycleButton({
-  id,
-  isDark,
-  isUltra,
-  onCycle,
-  ariaLabel,
-}: {
-  id: string;
-  isDark: boolean;
-  isUltra: boolean;
-  onCycle: () => void;
-  ariaLabel: string;
-}) {
-  const icon = !isDark ? <SunOutlined /> : !isUltra ? <MoonOutlined /> : <MoonFilled />;
-  return (
-    <button
-      id={id}
-      type="button"
-      className="sidebar-theme-cycle"
-      aria-label={ariaLabel}
-      title={ariaLabel}
-      onClick={onCycle}
-    >
-      {icon}
-    </button>
-  );
-}
-
-function readSidebarPinned() {
-  try {
-    return localStorage.getItem(SIDEBAR_PINNED_KEY) === 'true';
-  } catch {
-    return false;
-  }
-}
-
-function saveSidebarPinned(pinned: boolean) {
-  try {
-    localStorage.setItem(SIDEBAR_PINNED_KEY, String(pinned));
-  } catch {}
-}
 
 export default function AppSidebar() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isDark, isUltra, toggleTheme, toggleUltra } = useTheme();
-  const { open: openCommandPalette } = useCommandPalette();
-  const navigate = useNavigate();
   const { pathname, hash } = useLocation();
+  const navigate = useNavigate();
   const { allSetting } = useAllSettings();
-  const showSubFormats = !!(allSetting.subJsonEnable || allSetting.subClashEnable);
-  const showSubBalancers = !!allSetting.subJsonEnable;
-
-  const [hovered, setHovered] = useState(() => hoveredAcrossRemounts);
-  const [pinned, setPinned] = useState(readSidebarPinned);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const railCollapsed = !hovered && !pinned;
-  const railStyle = useMemo(
-    () => ({ '--sider-rail': `${pinned ? SIDER_WIDTH : RAIL_WIDTH}px` }) as CSSProperties,
-    [pinned],
-  );
-  const rootRef = useRef<HTMLDivElement>(null);
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const activeSubmenu = pathname === '/settings' || pathname === '/xray' ? pathname : null;
+  const selectedKey = activeSubmenu
+    ? `${pathname}${hash || (pathname === '/settings' ? '#general' : '#basic')}`
+    : pathname;
 
-  const updateHovered = useCallback((value: boolean) => {
-    hoveredAcrossRemounts = value;
-    setHovered(value);
-  }, []);
-
-  const togglePinned = useCallback(() => {
-    const next = !pinned;
-    saveSidebarPinned(next);
-    setPinned(next);
-  }, [pinned]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const el = rootRef.current;
-      if (el) updateHovered(el.matches(':hover'));
-    }, 150);
-    return () => window.clearTimeout(timer);
-  }, [updateHovered]);
-
-  const currentTheme: 'light' | 'dark' = isDark ? 'dark' : 'light';
-  const panelVersion = window.X_UI_CUR_VER || '';
-
-  const tabs = useMemo<{ key: string; icon: IconName; title: string }[]>(
-    () => [
-      { key: '/', icon: 'dashboard', title: t('menu.dashboard') },
-      { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
-      { key: '/clients', icon: 'team', title: t('menu.clients') },
-      { key: '/groups', icon: 'groups', title: t('menu.groups') },
-      { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
-      { key: '/hosts', icon: 'hosts', title: t('menu.hosts') },
-      { key: '/outbound', icon: 'outbound', title: t('menu.outbounds') },
-      { key: '/routing', icon: 'routing', title: t('menu.routing') },
-      { key: '/settings', icon: 'setting', title: t('menu.settings') },
-      { key: '/xray', icon: 'tool', title: t('menu.xray') },
-      { key: '/api-docs', icon: 'apidocs', title: t('menu.apiDocs') },
-      { key: '/sponsors', icon: 'sponsors', title: t('menu.sponsors') },
-      { key: LOGOUT_KEY, icon: 'logout', title: t('logout') },
-    ],
-    [t],
-  );
-
-  const navItems = useMemo(() => tabs.filter((tab) => tab.icon !== 'logout'), [tabs]);
-  const utilItems = useMemo(() => tabs.filter((tab) => tab.icon === 'logout'), [tabs]);
-
-  const settingsChildren = useMemo<NonNullable<MenuProps['items']>>(() => {
-    const children: NonNullable<MenuProps['items']> = [
-      {
-        key: '/settings#general',
-        icon: <SettingOutlined />,
-        label: t('pages.settings.panelSettings'),
-      },
-      {
-        key: '/settings#security',
-        icon: <SafetyOutlined />,
-        label: t('pages.settings.securitySettings'),
-      },
-      {
-        key: '/settings#telegram',
-        icon: <MessageOutlined />,
-        label: t('pages.settings.TGBotSettings'),
-      },
-      { key: '/settings#email', icon: <MailOutlined />, label: t('pages.settings.emailSettings') },
-      {
-        key: '/settings#discord',
-        icon: <DiscordOutlined />,
-        label: t('pages.settings.discordSettings'),
-      },
-      {
-        key: '/settings#subscription',
-        icon: <CloudServerOutlined />,
-        label: t('pages.settings.subSettings'),
-      },
-    ];
-    if (showSubFormats) {
-      children.push({
-        key: '/settings#subscription-formats',
-        icon: <CodeOutlined />,
-        label: t('menu.subFormats'),
-      });
-    }
-    if (showSubBalancers) {
-      children.push({
-        key: '/settings#subscription-balancers',
-        icon: <ApartmentOutlined />,
-        label: t('pages.settings.subBalancers.menu'),
-      });
-    }
-    return children;
-  }, [t, showSubFormats, showSubBalancers]);
-
-  const xrayChildren = useMemo<NonNullable<MenuProps['items']>>(
-    () => [
-      { key: '/xray#basic', icon: <SettingOutlined />, label: t('pages.xray.basicTemplate') },
-      { key: '/xray#balancer', icon: <ClusterOutlined />, label: t('pages.xray.Balancers') },
-      { key: '/xray#dns', icon: <DatabaseOutlined />, label: 'DNS' },
-      { key: '/xray#advanced', icon: <CodeOutlined />, label: t('pages.xray.advancedTemplate') },
-    ],
-    [t],
-  );
-
-  const settingsActive = pathname === '/settings';
-  const xrayActive = pathname === '/xray';
-  const selectedKey = settingsActive
-    ? `/settings${hash || '#general'}`
-    : xrayActive
-      ? `/xray${hash || '#basic'}`
-      : pathname === ''
-        ? '/'
-        : pathname;
-
-  const openSubmenu = settingsActive ? '/settings' : xrayActive ? '/xray' : null;
-  const [openKeys, setOpenKeys] = useState<string[]>(() => (openSubmenu ? [openSubmenu] : []));
-  if (openSubmenu && !openKeys.includes(openSubmenu)) {
-    setOpenKeys([...openKeys, openSubmenu]);
+  const settingsChildren: NonNullable<MenuProps['items']> = [
+    {
+      key: '/settings#general',
+      icon: <SettingOutlined />,
+      label: t('pages.settings.panelSettings'),
+    },
+    {
+      key: '/settings#security',
+      icon: <SafetyOutlined />,
+      label: t('pages.settings.securitySettings'),
+    },
+    {
+      key: '/settings#telegram',
+      icon: <MessageOutlined />,
+      label: t('pages.settings.TGBotSettings'),
+    },
+    { key: '/settings#email', icon: <MailOutlined />, label: t('pages.settings.emailSettings') },
+    {
+      key: '/settings#discord',
+      icon: <DiscordOutlined />,
+      label: t('pages.settings.discordSettings'),
+    },
+    {
+      key: '/settings#subscription',
+      icon: <CloudServerOutlined />,
+      label: t('pages.settings.subSettings'),
+    },
+  ];
+  if (allSetting.subJsonEnable || allSetting.subClashEnable) {
+    settingsChildren.push({
+      key: '/settings#subscription-formats',
+      icon: <CodeOutlined />,
+      label: t('menu.subFormats'),
+    });
   }
-
-  const toMenuItems = useCallback(
-    (items: typeof tabs): MenuProps['items'] =>
-      items.map((tab) => {
-        const Icon = iconByName[tab.icon];
-        if (tab.key === '/settings') {
-          return { key: tab.key, icon: <Icon />, label: tab.title, children: settingsChildren };
-        }
-        if (tab.key === '/xray') {
-          return { key: tab.key, icon: <Icon />, label: tab.title, children: xrayChildren };
-        }
-        return { key: tab.key, icon: <Icon />, label: tab.title, title: '' };
-      }),
-    [settingsChildren, xrayChildren],
-  );
-
-  const openLink = useCallback(
-    async (key: string) => {
-      if (key === LOGOUT_KEY) {
-        await HttpUtil.post('/logout');
-        window.location.href = window.X_UI_BASE_PATH || '/';
-        return;
-      }
-      navigate(key);
+  if (allSetting.subJsonEnable) {
+    settingsChildren.push({
+      key: '/settings#subscription-balancers',
+      icon: <ApartmentOutlined />,
+      label: t('pages.settings.subBalancers.menu'),
+    });
+  }
+  const items: MenuProps['items'] = [
+    { key: '/', icon: <DashboardOutlined />, label: t('menu.dashboard') },
+    {
+      type: 'group',
+      key: 'customers',
+      label: t('menu.clients'),
+      children: [
+        { key: '/clients', icon: <TeamOutlined />, label: t('menu.clients') },
+        { key: '/groups', icon: <TagsOutlined />, label: t('menu.groups') },
+        { key: '/store', icon: <ShopOutlined />, label: t('farstarStore.title') },
+      ],
     },
-    [navigate],
-  );
-
-  const onMenuClick = useCallback<NonNullable<MenuProps['onClick']>>(
-    ({ key }) => {
-      openLink(String(key));
+    {
+      type: 'group',
+      key: 'network',
+      label: t('menu.nodes'),
+      children: [
+        { key: '/inbounds', icon: <ImportOutlined />, label: t('menu.inbounds') },
+        { key: '/nodes', icon: <ClusterOutlined />, label: t('menu.nodes') },
+        { key: '/hosts', icon: <GlobalOutlined />, label: t('menu.hosts') },
+        { key: '/outbound', icon: <ExportOutlined />, label: t('menu.outbounds') },
+        { key: '/routing', icon: <SwapOutlined />, label: t('menu.routing') },
+      ],
     },
-    [openLink],
-  );
-
-  const cycleTheme = useCallback(
-    (id: string) => {
-      pauseAnimationsUntilLeave(id);
-      if (!isDark) {
-        toggleTheme();
-        if (isUltra) toggleUltra();
-      } else if (!isUltra) {
-        toggleUltra();
-      } else {
-        toggleUltra();
-        toggleTheme();
-      }
+    {
+      type: 'group',
+      key: 'system',
+      label: t('menu.settings'),
+      children: [
+        {
+          key: '/settings',
+          icon: <SettingOutlined />,
+          label: t('menu.settings'),
+          children: settingsChildren,
+        },
+        {
+          key: '/xray',
+          icon: <ToolOutlined />,
+          label: t('menu.xray'),
+          children: [
+            { key: '/xray#basic', icon: <SettingOutlined />, label: t('pages.xray.basicTemplate') },
+            { key: '/xray#balancer', icon: <ClusterOutlined />, label: t('pages.xray.Balancers') },
+            { key: '/xray#dns', icon: <DatabaseOutlined />, label: 'DNS' },
+            {
+              key: '/xray#advanced',
+              icon: <CodeOutlined />,
+              label: t('pages.xray.advancedTemplate'),
+            },
+          ],
+        },
+        { key: '/api-docs', icon: <ApiOutlined />, label: t('menu.apiDocs') },
+      ],
     },
-    [isDark, isUltra, toggleTheme, toggleUltra],
+  ];
+  const menu = (
+    <Menu
+      mode="inline"
+      theme={isDark ? 'dark' : 'light'}
+      selectedKeys={[selectedKey]}
+      openKeys={Array.from(new Set([...openKeys, ...(activeSubmenu ? [activeSubmenu] : [])]))}
+      onOpenChange={setOpenKeys}
+      items={items}
+      onClick={({ key }) => {
+        navigate(key);
+        setDrawerOpen(false);
+      }}
+    />
+  );
+  const brand = (
+    <div className="farstar-brand">
+      <span className="farstar-monogram" aria-hidden="true">
+        F
+      </span>
+      <div>
+        <strong>FARSTAR</strong>
+        <small>CONTROL ROOM</small>
+      </div>
+    </div>
+  );
+  const footer = (
+    <div className="farstar-nav-footer">
+      <div className="farstar-nav-tools">
+        <a
+          href={DOCS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t('menu.docs')}
+          title={t('menu.docs')}
+        >
+          <ReadOutlined />
+        </a>
+        <button
+          type="button"
+          aria-label={t('menu.theme')}
+          title={t('menu.theme')}
+          onClick={() => {
+            if (!isDark) toggleTheme();
+            else if (!isUltra) toggleUltra();
+            else {
+              toggleUltra();
+              toggleTheme();
+            }
+          }}
+        >
+          {isDark ? <MoonOutlined /> : <SunOutlined />}
+        </button>
+        <button
+          type="button"
+          aria-label={t('logout')}
+          title={t('logout')}
+          onClick={async () => {
+            await HttpUtil.post('/logout');
+            window.location.href = window.X_UI_BASE_PATH || '/';
+          }}
+        >
+          <LogoutOutlined />
+        </button>
+      </div>
+      <div className="farstar-nav-meta">
+        <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
+          <GithubOutlined /> {formatPanelVersion(window.X_UI_CUR_VER || '')}
+        </a>
+        <a
+          href={`${window.X_UI_BASE_PATH || '/'}panel/sponsors`}
+          onClick={(event) => {
+            event.preventDefault();
+            navigate('/sponsors');
+            setDrawerOpen(false);
+          }}
+        >
+          {t('menu.sponsors')}
+        </a>
+      </div>
+    </div>
   );
 
   return (
-    <div
-      ref={rootRef}
-      className={`ant-sidebar${pinned ? ' sidebar-pinned' : ''}`}
-      style={railStyle}
-      onMouseEnter={() => updateHovered(true)}
-      onMouseLeave={() => updateHovered(false)}
-    >
-      <Layout.Sider
-        theme={currentTheme}
-        width={SIDER_WIDTH}
-        collapsedWidth={RAIL_WIDTH}
-        collapsed={railCollapsed}
+    <>
+      <aside className="farstar-navigation" aria-label="FARSTAR">
+        {brand}
+        <div className="farstar-nav-scroll">{menu}</div>
+        {footer}
+      </aside>
+      <button
+        className="farstar-mobile-menu"
+        type="button"
+        aria-label={t('menu.openMenu')}
+        onClick={() => setDrawerOpen(true)}
       >
-        <div className="sider-brand">
-          <div className="brand-block">
-            <span className="brand-text">{railCollapsed ? 'F' : 'FARSTAR'}</span>
-          </div>
-          {!railCollapsed && (
-            <div className="brand-actions">
-              <button
-                type="button"
-                className="sidebar-pin"
-                aria-label={t('menu.pinSidebar')}
-                aria-pressed={pinned}
-                title={t(pinned ? 'menu.unpinSidebar' : 'menu.pinSidebar')}
-                onClick={togglePinned}
-              >
-                {pinned ? <PushpinFilled /> : <PushpinOutlined />}
-              </button>
-              <DocsButton ariaLabel={t('menu.docs') || 'Documentation'} />
-              <DonateButton ariaLabel={t('menu.donate') || 'Donate'} />
-              <ThemeCycleButton
-                id="theme-cycle"
-                isDark={isDark}
-                isUltra={isUltra}
-                onCycle={() => cycleTheme('theme-cycle')}
-                ariaLabel={t('menu.theme')}
-              />
-            </div>
-          )}
-        </div>
-        <Tooltip
-          title={
-            railCollapsed ? t('commandPalette.title') || 'Command Palette (Ctrl + K)' : undefined
-          }
-          placement="right"
-        >
-          <button
-            type="button"
-            className={`sidebar-command-trigger${railCollapsed ? ' collapsed' : ''}`}
-            onClick={openCommandPalette}
-            aria-label={t('commandPalette.title') || 'Command Palette (Ctrl + K)'}
-          >
-            <span className="sidebar-command-left">
-              <SearchOutlined className="sidebar-command-icon" />
-              <span className="sidebar-command-text">
-                {t('commandPalette.search') || 'Search...'}
-              </span>
-            </span>
-            <span className="sidebar-command-kbd">
-              <span className="kbd-cmd">{SHORTCUT_MODIFIER}</span>
-              <span className="kbd-key">K</span>
-            </span>
-          </button>
-        </Tooltip>
-        <Menu
-          theme={currentTheme}
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          openKeys={railCollapsed ? undefined : openKeys}
-          onOpenChange={(keys) => setOpenKeys(keys as string[])}
-          className="sider-nav"
-          items={toMenuItems(navItems)}
-          onClick={onMenuClick}
-        />
-        <Menu
-          theme={currentTheme}
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          className="sider-utility"
-          items={toMenuItems(utilItems)}
-          onClick={onMenuClick}
-        />
-        <div className="sider-footer">
-          <SponsorSlot
-            slot="sidebar"
-            variant="compact"
-            iconOnly={railCollapsed}
-            rotate
-            className="sider-sponsor"
-          />
-          <VersionBadge version={panelVersion} collapsed={railCollapsed} />
-        </div>
-      </Layout.Sider>
-
+        <MenuOutlined />
+      </button>
       <Drawer
-        placement="left"
-        closable={false}
+        title="FARSTAR"
+        placement={i18n.dir() === 'rtl' ? 'right' : 'left'}
         open={drawerOpen}
-        rootClassName={currentTheme}
-        size="min(82vw, 320px)"
-        styles={{
-          wrapper: { padding: 0 },
-          body: { padding: 0, display: 'flex', flexDirection: 'column', height: '100%' },
-          header: { display: 'none' },
-        }}
         onClose={() => setDrawerOpen(false)}
+        size="min(88vw, 320px)"
+        className="farstar-nav-drawer"
+        styles={{ body: { display: 'flex', flexDirection: 'column', padding: 12 } }}
       >
-        <div className="drawer-header">
-          <div className="brand-block">
-            <span className="drawer-brand">FARSTAR</span>
-          </div>
-          <div className="drawer-header-actions">
-            <DocsButton ariaLabel={t('menu.docs') || 'Documentation'} />
-            <DonateButton ariaLabel={t('menu.donate') || 'Donate'} />
-            <ThemeCycleButton
-              id="theme-cycle-drawer"
-              isDark={isDark}
-              isUltra={isUltra}
-              onCycle={() => cycleTheme('theme-cycle-drawer')}
-              ariaLabel={t('menu.theme')}
-            />
-            <button
-              className="drawer-close"
-              type="button"
-              aria-label={t('close')}
-              onClick={() => setDrawerOpen(false)}
-            >
-              <CloseOutlined />
-            </button>
-          </div>
-        </div>
-        <button
-          type="button"
-          className="sidebar-command-trigger"
-          onClick={() => {
-            setDrawerOpen(false);
-            openCommandPalette();
-          }}
-          aria-label={t('commandPalette.title') || 'Command Palette (Ctrl + K)'}
-          style={{ margin: '8px 12px 4px', width: 'calc(100% - 24px)' }}
-        >
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <SearchOutlined className="sidebar-command-icon" />
-            <span>{t('commandPalette.search') || 'Search...'}</span>
-          </span>
-          <span className="sidebar-command-kbd">
-            <span className="kbd-cmd">{SHORTCUT_MODIFIER}</span>
-            <span className="kbd-key">K</span>
-          </span>
-        </button>
-        <Menu
-          theme={currentTheme}
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          openKeys={openKeys}
-          onOpenChange={(keys) => setOpenKeys(keys as string[])}
-          className="drawer-menu drawer-nav"
-          items={toMenuItems(navItems)}
-          onClick={(info) => {
-            onMenuClick(info);
-            setDrawerOpen(false);
-          }}
-        />
-        <Menu
-          theme={currentTheme}
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          className="drawer-menu drawer-utility"
-          items={toMenuItems(utilItems)}
-          onClick={(info) => {
-            onMenuClick(info);
-            setDrawerOpen(false);
-          }}
-        />
-        <div className="drawer-footer">
-          <SponsorSlot slot="sidebar" variant="compact" rotate className="sider-sponsor" />
-          <VersionBadge version={panelVersion} />
-        </div>
+        <div className="farstar-nav-scroll">{menu}</div>
+        {footer}
       </Drawer>
-
-      {!drawerOpen && (
-        <button
-          className="drawer-handle"
-          type="button"
-          aria-label={t('menu.openMenu')}
-          onClick={() => setDrawerOpen(true)}
-        >
-          <MenuOutlined />
-        </button>
-      )}
-    </div>
+    </>
   );
 }

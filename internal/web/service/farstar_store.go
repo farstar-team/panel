@@ -37,8 +37,8 @@ func (s *StoreService) Plans() ([]model.StorePlan, error) {
 }
 
 func (s *StoreService) AddPlan(plan model.StorePlan) error {
-	if strings.TrimSpace(plan.Name) == "" || len(plan.Name) > 150 || plan.Price <= 0 || plan.Price > 1_000_000_000_000 || plan.QuotaBytes < 1 || plan.QuotaBytes > 100_000*(1<<30) || plan.Days < 1 || plan.Days > 3650 {
-		return errors.New("نام، قیمت، حجم یا مدت پلن معتبر نیست")
+	if err := validateStorePlan(plan); err != nil {
+		return err
 	}
 	plan.Enabled = true
 	return database.GetDB().Create(&plan).Error

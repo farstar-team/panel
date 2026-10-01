@@ -1,6 +1,18 @@
 import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, ConfigProvider, Layout, Modal, Result, Spin, message } from 'antd';
+import { useNavigate } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Button,
+  Card,
+  ConfigProvider,
+  Layout,
+  Modal,
+  Result,
+  Spin,
+  Statistic,
+  message,
+} from 'antd';
 import {
   CopyOutlined,
   CloudDownloadOutlined,
@@ -20,9 +32,7 @@ import {
 import { useTheme } from '@/hooks/useTheme';
 import { useStatusQuery } from '@/api/queries/useStatusQuery';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import AppSidebar from '@/layouts/AppSidebar';
 import { LazyMount } from '@/components/utility';
-import SponsorSlot from '@/components/sponsor/SponsorSlot';
 import { setMessageInstance } from '@/utils/messageBus';
 import OverviewActionBar from './OverviewActionBar';
 import VitalTile from './VitalTile';
@@ -31,6 +41,7 @@ import ConnectionsCard from './ConnectionsCard';
 import SystemStrip from './SystemStrip';
 import { mean, peak, useOverviewHistory } from './useOverviewHistory';
 import type { PanelUpdateInfo } from './PanelUpdateModal';
+import { ClientPageResponseSchema } from '@/schemas/client';
 const JsonEditor = lazy(() => import('@/components/form/JsonEditor'));
 const PanelUpdateModal = lazy(() => import('./PanelUpdateModal'));
 const LogModal = lazy(() => import('./LogModal'));
@@ -44,6 +55,20 @@ import './IndexPage.css';
 
 export default function IndexPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const customerOverview = useQuery({
+    queryKey: ['farstar-customer-overview'],
+    refetchInterval: 15000,
+    queryFn: async () => {
+      const result = await HttpUtil.get(
+        '/panel/api/clients/list/paged?page=1&pageSize=1',
+        undefined,
+        { silent: true },
+      );
+      if (!result.success) throw new Error(result.msg);
+      return ClientPageResponseSchema.parse(result.obj).summary;
+    },
+  });
   const { isDark, isUltra, antdThemeConfig } = useTheme();
   const { status, fetched, fetchError, refresh } = useStatusQuery();
   const { isMobile } = useMediaQuery();
@@ -169,8 +194,6 @@ export default function IndexPage() {
     <ConfigProvider theme={antdThemeConfig}>
       {messageContextHolder}
       <Layout className={pageClass}>
-        <AppSidebar />
-
         <Layout className="content-shell">
           <Layout.Content className="content-area">
             <Spin
@@ -194,106 +217,168 @@ export default function IndexPage() {
                 />
               ) : (
                 <div className="ov-page">
-                  <OverviewActionBar
-                    status={status}
-                    isMobile={isMobile}
-                    accessLogEnable={accessLogEnable}
-                    panelVersion={displayVersion}
-                    latestVersion={panelUpdateInfo.latestVersion}
-                    updateAvailable={panelUpdateInfo.updateAvailable}
-                    onStopXray={stopXray}
-                    onRestartXray={restartXray}
-                    onOpenLogs={() => setLogsOpen(true)}
-                    onOpenXrayLogs={() => setXrayLogsOpen(true)}
-                    onOpenAmneziaWGLogs={() => setAmneziawgLogsOpen(true)}
-                    onOpenConfig={openConfig}
-                    onOpenBackup={() => setBackupOpen(true)}
-                    onOpenSystemHistory={() => setSysHistoryOpen(true)}
-                    onOpenXrayMetrics={() => setXrayMetricsOpen(true)}
-                    onOpenPanelUpdate={() => setPanelUpdateOpen(true)}
-                    onOpenVersionSwitch={() => setVersionOpen(true)}
-                  />
-
-                  <SponsorSlot slot="dashboard" />
-
-                  {health && (
-                    <div className="ov-health" style={{ color: health.color }}>
-                      <span className="ov-health-mark" />
-                      {health.text}
+                  <section className="farstar-intro">
+                    <div>
+                      <span className="farstar-eyebrow">FARSTAR NETWORK</span>
+                      <h2>{t('farstarHome.title')}</h2>
+                      <p>{t('farstarHome.caption')}</p>
                     </div>
+                    <div className="farstar-shortcuts">
+                      <Button type="primary" size="large" onClick={() => navigate('/clients')}>
+                        {t('farstarHome.manageClients')}
+                      </Button>
+                      <Button size="large" onClick={() => navigate('/inbounds')}>
+                        {t('farstarHome.manageConnections')}
+                      </Button>
+                      <Button size="large" onClick={() => navigate('/store')}>
+                        {t('farstarStore.title')}
+                      </Button>
+                    </div>
+                  </section>
+                  {customerOverview.error && (
+                    <Result
+                      status="error"
+                      title={t('somethingWentWrong')}
+                      subTitle={customerOverview.error.message}
+                      extra={
+                        <Button onClick={() => customerOverview.refetch()}>{t('refresh')}</Button>
+                      }
+                    />
                   )}
-
-                  <hr className="ov-rule" />
-
-                  <div className="ov-vitals">
-                    <VitalTile
-                      icon={<DashboardOutlined />}
-                      label={t('pages.index.cpu')}
-                      percent={status.cpu.percent}
-                      statusColor={status.cpu.color}
-                      detail={`${CPUFormatter.cpuCoreFormat(status.cpuCores)} / ${status.logicalPro}T · ${CPUFormatter.cpuSpeedFormat(status.cpuSpeedMhz)}`}
-                      footLeft={`${t('pages.index.avg')} ${mean(history.series.cpu).toFixed(0)}%`}
-                      footRight={`${t('pages.index.peak')} ${peak(history.series.cpu).toFixed(0)}%`}
-                      data={history.series.cpu}
-                      isMobile={isMobile}
-                    />
-                    <VitalTile
-                      icon={<DatabaseOutlined />}
-                      label={t('pages.index.memory')}
-                      percent={status.mem.percent}
-                      statusColor={status.mem.color}
-                      detail={`${SizeFormatter.sizeFormat(status.mem.current)} / ${SizeFormatter.sizeFormat(status.mem.total)}`}
-                      footLeft={`${t('pages.index.avg')} ${mean(history.series.mem).toFixed(0)}%`}
-                      footRight={`${t('pages.index.peak')} ${peak(history.series.mem).toFixed(0)}%`}
-                      data={history.series.mem}
-                      isMobile={isMobile}
-                    />
-                    <VitalTile
-                      icon={<SwapOutlined />}
-                      label={t('pages.index.swap')}
-                      percent={status.swap.percent}
-                      statusColor={status.swap.color}
-                      detail={`${SizeFormatter.sizeFormat(status.swap.current)} / ${SizeFormatter.sizeFormat(status.swap.total)}`}
-                      footLeft={`${t('pages.index.avg')} ${mean(history.series.swap).toFixed(1)}%`}
-                      footRight={`${t('pages.index.peak')} ${peak(history.series.swap).toFixed(0)}%`}
-                      data={history.series.swap}
-                      isMobile={isMobile}
-                    />
-                    <VitalTile
-                      icon={<HddOutlined />}
-                      label={t('pages.index.storage')}
-                      percent={status.disk.percent}
-                      statusColor={status.disk.color}
-                      detail={`${SizeFormatter.sizeFormat(status.disk.current)} / ${SizeFormatter.sizeFormat(totalDisk)}`}
-                      footLeft={`${t('pages.index.free')} ${SizeFormatter.sizeFormat(freeDisk)}`}
-                      footRight={`${t('pages.index.avg')} ${mean(history.series.diskUsage).toFixed(1)}%`}
-                      data={history.series.diskUsage}
-                      isMobile={isMobile}
-                    />
+                  <div className="farstar-business-stats">
+                    {[
+                      { key: 'total', label: t('clients'), value: customerOverview.data?.total },
+                      {
+                        key: 'active',
+                        label: t('subscription.active'),
+                        value: customerOverview.data?.active,
+                      },
+                      {
+                        key: 'online',
+                        label: t('online'),
+                        value: customerOverview.data?.onlineCount,
+                      },
+                      {
+                        key: 'depleted',
+                        label: t('depleted'),
+                        value: customerOverview.data?.depletedCount,
+                      },
+                    ].map((item, index) => (
+                      <Card
+                        key={item.key}
+                        loading={customerOverview.isLoading}
+                        className={`farstar-business-stat stat-${index}`}
+                      >
+                        <span className="farstar-stat-index" aria-hidden="true">
+                          0{index + 1}
+                        </span>
+                        <Statistic title={item.label} value={item.value ?? '—'} />
+                      </Card>
+                    ))}
                   </div>
+                  <details className="farstar-system-details">
+                    <summary>{t('farstarHome.system')}</summary>
+                    <div className="ov-page">
+                      <OverviewActionBar
+                        status={status}
+                        isMobile={isMobile}
+                        accessLogEnable={accessLogEnable}
+                        panelVersion={displayVersion}
+                        latestVersion={panelUpdateInfo.latestVersion}
+                        updateAvailable={panelUpdateInfo.updateAvailable}
+                        onStopXray={stopXray}
+                        onRestartXray={restartXray}
+                        onOpenLogs={() => setLogsOpen(true)}
+                        onOpenXrayLogs={() => setXrayLogsOpen(true)}
+                        onOpenAmneziaWGLogs={() => setAmneziawgLogsOpen(true)}
+                        onOpenConfig={openConfig}
+                        onOpenBackup={() => setBackupOpen(true)}
+                        onOpenSystemHistory={() => setSysHistoryOpen(true)}
+                        onOpenXrayMetrics={() => setXrayMetricsOpen(true)}
+                        onOpenPanelUpdate={() => setPanelUpdateOpen(true)}
+                        onOpenVersionSwitch={() => setVersionOpen(true)}
+                      />
 
-                  <div className="ov-mid">
-                    <ThroughputCard
-                      status={status}
-                      up={history.series.netUp}
-                      down={history.series.netDown}
-                      labels={history.labels}
-                      isMobile={isMobile}
-                    />
-                    <ConnectionsCard
-                      status={status}
-                      tcp={history.series.tcpCount}
-                      udp={history.series.udpCount}
-                      labels={history.labels}
-                      isMobile={isMobile}
-                    />
-                  </div>
+                      {health && (
+                        <div className="ov-health" style={{ color: health.color }}>
+                          <span className="ov-health-mark" />
+                          {health.text}
+                        </div>
+                      )}
 
-                  <SystemStrip
-                    status={status}
-                    showIp={showIp}
-                    onToggleIp={() => setShowIp((v) => !v)}
-                  />
+                      <hr className="ov-rule" />
+
+                      <div className="ov-vitals">
+                        <VitalTile
+                          icon={<DashboardOutlined />}
+                          label={t('pages.index.cpu')}
+                          percent={status.cpu.percent}
+                          statusColor={status.cpu.color}
+                          detail={`${CPUFormatter.cpuCoreFormat(status.cpuCores)} / ${status.logicalPro}T · ${CPUFormatter.cpuSpeedFormat(status.cpuSpeedMhz)}`}
+                          footLeft={`${t('pages.index.avg')} ${mean(history.series.cpu).toFixed(0)}%`}
+                          footRight={`${t('pages.index.peak')} ${peak(history.series.cpu).toFixed(0)}%`}
+                          data={history.series.cpu}
+                          isMobile={isMobile}
+                        />
+                        <VitalTile
+                          icon={<DatabaseOutlined />}
+                          label={t('pages.index.memory')}
+                          percent={status.mem.percent}
+                          statusColor={status.mem.color}
+                          detail={`${SizeFormatter.sizeFormat(status.mem.current)} / ${SizeFormatter.sizeFormat(status.mem.total)}`}
+                          footLeft={`${t('pages.index.avg')} ${mean(history.series.mem).toFixed(0)}%`}
+                          footRight={`${t('pages.index.peak')} ${peak(history.series.mem).toFixed(0)}%`}
+                          data={history.series.mem}
+                          isMobile={isMobile}
+                        />
+                        <VitalTile
+                          icon={<SwapOutlined />}
+                          label={t('pages.index.swap')}
+                          percent={status.swap.percent}
+                          statusColor={status.swap.color}
+                          detail={`${SizeFormatter.sizeFormat(status.swap.current)} / ${SizeFormatter.sizeFormat(status.swap.total)}`}
+                          footLeft={`${t('pages.index.avg')} ${mean(history.series.swap).toFixed(1)}%`}
+                          footRight={`${t('pages.index.peak')} ${peak(history.series.swap).toFixed(0)}%`}
+                          data={history.series.swap}
+                          isMobile={isMobile}
+                        />
+                        <VitalTile
+                          icon={<HddOutlined />}
+                          label={t('pages.index.storage')}
+                          percent={status.disk.percent}
+                          statusColor={status.disk.color}
+                          detail={`${SizeFormatter.sizeFormat(status.disk.current)} / ${SizeFormatter.sizeFormat(totalDisk)}`}
+                          footLeft={`${t('pages.index.free')} ${SizeFormatter.sizeFormat(freeDisk)}`}
+                          footRight={`${t('pages.index.avg')} ${mean(history.series.diskUsage).toFixed(1)}%`}
+                          data={history.series.diskUsage}
+                          isMobile={isMobile}
+                        />
+                      </div>
+
+                      <div className="ov-mid">
+                        <ThroughputCard
+                          status={status}
+                          up={history.series.netUp}
+                          down={history.series.netDown}
+                          labels={history.labels}
+                          isMobile={isMobile}
+                        />
+                        <ConnectionsCard
+                          status={status}
+                          tcp={history.series.tcpCount}
+                          udp={history.series.udpCount}
+                          labels={history.labels}
+                          isMobile={isMobile}
+                        />
+                      </div>
+
+                      <SystemStrip
+                        status={status}
+                        showIp={showIp}
+                        onToggleIp={() => setShowIp((v) => !v)}
+                      />
+                    </div>
+                  </details>
                 </div>
               )}
             </Spin>

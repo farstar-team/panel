@@ -782,6 +782,14 @@ type Node struct {
 	Id                  int      `json:"id" form:"id" gorm:"primaryKey;autoIncrement" example:"1"`
 	Name                string   `json:"name" form:"name" gorm:"uniqueIndex" validate:"required" example:"de-fra-1"`
 	Remark              string   `json:"remark" form:"remark"`
+	Region              string   `json:"region" gorm:"default:abroad"`
+	SSHPort             int      `json:"sshPort" gorm:"default:22"`
+	SSHUsername         string   `json:"sshUsername"`
+	SSHFingerprint      string   `json:"sshFingerprint"`
+	SSHPassword         string   `json:"-"`
+	SSHPrivateKey       string   `json:"-"`
+	ProvisionStatus     string   `json:"provisionStatus"`
+	ProvisionError      string   `json:"provisionError"`
 	Scheme              string   `json:"scheme" form:"scheme" validate:"omitempty,oneof=http https" example:"https"`
 	Address             string   `json:"address" form:"address" validate:"required" example:"node1.example.com"`
 	Port                int      `json:"port" form:"port" validate:"gte=1,lte=65535" example:"2053"`

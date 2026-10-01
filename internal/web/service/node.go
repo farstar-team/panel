@@ -397,6 +397,12 @@ func normalizeBasePath(p string) string {
 
 func (s *NodeService) normalize(n *model.Node) error {
 	n.Name = strings.TrimSpace(n.Name)
+	if n.Region == "" {
+		n.Region = "abroad"
+	}
+	if n.Region != "iran" && n.Region != "abroad" {
+		return errors.New("node region must be iran or abroad")
+	}
 	n.ApiToken = strings.TrimSpace(n.ApiToken)
 	if n.Name == "" {
 		return common.NewError("node name is required")
@@ -452,14 +458,20 @@ func (s *NodeService) Create(n *model.Node) error {
 		return err
 	}
 	db := database.GetDB()
+	if (n.SSHPassword != "" || n.SSHPrivateKey != "") && !nodetoken.Enabled() {
+		return errors.New(sshEncryptionRequired)
+	}
 	if !nodetoken.Enabled() {
 		return db.Create(n).Error
 	}
 	plaintext := n.ApiToken
+	sshPassword, sshKey := n.SSHPassword, n.SSHPrivateKey
 	return db.Transaction(func(tx *gorm.DB) error {
 		// The id-bound ciphertext can only be produced after insertion. Never put
 		// plaintext in the initial tuple: PostgreSQL WAL would retain it.
 		n.ApiToken = ""
+		n.SSHPassword, n.SSHPrivateKey = "", ""
+		defer func() { n.SSHPassword, n.SSHPrivateKey = sshPassword, sshKey }()
 		defer func() { n.ApiToken = plaintext }()
 		if err := tx.Create(n).Error; err != nil {
 			return err
@@ -468,17 +480,31 @@ func (s *NodeService) Create(n *model.Node) error {
 		if err != nil {
 			return err
 		}
-		if enc == plaintext {
-			return nil // off-mode / empty token: nothing to rewrite
+		// Keep provisioning nodes disabled despite GORM's true creation default.
+		if n.ProvisionStatus != "" {
+			n.Enable = false
 		}
-		// DB column gets ciphertext; the in-memory struct keeps plaintext so the
-		// create response echoes the same usable value GetById would return.
-		return tx.Model(model.Node{}).Where("id = ?", n.Id).Update("api_token", enc).Error
+		password, err := nodetoken.EncryptBound(sshBinding(n.Id, "password"), sshPassword)
+		if err != nil {
+			return err
+		}
+		key, err := nodetoken.EncryptBound(sshBinding(n.Id, "private-key"), sshKey)
+		if err != nil {
+			return err
+		}
+		updates := map[string]any{"api_token": enc, "ssh_password": password, "ssh_private_key": key}
+		if n.ProvisionStatus != "" {
+			updates["enable"] = false
+		}
+		return tx.Model(model.Node{}).Where("id = ?", n.Id).Updates(updates).Error
 	})
 }
 
 func (s *NodeService) CreateFromRequest(req *NodeMutationRequest) (*NodeView, error) {
 	if err := req.validateCredentials(true); err != nil {
+		return nil, err
+	}
+	if err := validateNodeSSH(req.SSH, nil, req.Region == "iran"); err != nil {
 		return nil, err
 	}
 	n := req.toNode()
@@ -507,6 +533,9 @@ func nodeSelectionGrew(existing, in *model.Node) bool {
 }
 
 func (s *NodeService) Update(id int, in *model.Node) error {
+	if err := guardNodeProvisioningByID(id); err != nil {
+		return err
+	}
 	if err := s.normalize(in); err != nil {
 		return err
 	}
@@ -562,6 +591,9 @@ func (s *NodeService) Update(id int, in *model.Node) error {
 }
 
 func (s *NodeService) UpdateFromRequest(id int, req *NodeMutationRequest) error {
+	if err := guardNodeProvisioningByID(id); err != nil {
+		return err
+	}
 	if err := req.validateCredentials(false); err != nil {
 		return err
 	}
@@ -576,6 +608,15 @@ func (s *NodeService) UpdateFromRequest(id int, req *NodeMutationRequest) error 
 	db := database.GetDB()
 	existing := &model.Node{}
 	if err := db.Where("id = ?", id).First(existing).Error; err != nil {
+		return err
+	}
+	if req.Region == "" {
+		in.Region = existing.Region
+	}
+	if in.Address != existing.Address && (existing.SSHPassword != "" || existing.SSHPrivateKey != "") && (req.SSH == nil || !req.SSH.TrustConfirmed) {
+		return errors.New("confirm SSH trust again before changing the server address")
+	}
+	if err := validateNodeSSH(req.SSH, existing, in.Region == "iran"); err != nil {
 		return err
 	}
 	apiToken := existing.ApiToken
@@ -606,6 +647,10 @@ func (s *NodeService) UpdateFromRequest(id int, req *NodeMutationRequest) error 
 		"inbound_sync_mode":     in.InboundSyncMode,
 		"inbound_tags":          string(inboundTagsJSON),
 		"outbound_tag":          in.OutboundTag,
+	}
+	updates["region"] = in.Region
+	if err := addSSHUpdates(updates, id, req.SSH); err != nil {
+		return err
 	}
 	if nodeSelectionGrew(existing, in) {
 		updates["inbounds_adopted_at"] = 0
@@ -835,6 +880,9 @@ func FilterNodeSnapshot(n *model.Node, snap *runtime.TrafficSnapshot) {
 }
 
 func (s *NodeService) Delete(id int) error {
+	if err := guardNodeProvisioningByID(id); err != nil {
+		return err
+	}
 	db := database.GetDB()
 	// Refuse to delete a node that still owns inbounds: dropping the node row
 	// while inbounds keep its node_id leaves orphaned, dangling references that
@@ -888,6 +936,9 @@ func (s *NodeService) Delete(id int) error {
 }
 
 func (s *NodeService) SetEnable(id int, enable bool) error {
+	if err := guardNodeProvisioningByID(id); err != nil {
+		return err
+	}
 	db := database.GetDB()
 	if err := db.Model(model.Node{}).Where("id = ?", id).Update("enable", enable).Error; err != nil {
 		return err

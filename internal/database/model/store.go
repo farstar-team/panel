@@ -1,19 +1,19 @@
 package model
 
 type StoreConfig struct {
-	ID          int `gorm:"primaryKey"`
-	Enabled     bool
-	PaymentText string
-	SupportURL  string
+	ID          int    `gorm:"primaryKey" json:"id"`
+	Enabled     bool   `json:"enabled"`
+	PaymentText string `json:"paymentText"`
+	SupportURL  string `json:"supportURL"`
 }
 
 type StorePlan struct {
-	ID         int `gorm:"primaryKey"`
-	Name       string
-	Price      int64
-	QuotaBytes int64
-	Days       int
-	Enabled    bool
+	ID         int    `gorm:"primaryKey" json:"id"`
+	Name       string `json:"name"`
+	Price      int64  `json:"price"`
+	QuotaBytes int64  `json:"quotaBytes"`
+	Days       int    `json:"days"`
+	Enabled    bool   `json:"enabled"`
 }
 
 type StoreOrder struct {

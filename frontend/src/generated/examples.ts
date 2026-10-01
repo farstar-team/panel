@@ -924,8 +924,14 @@ export const EXAMPLES: Record<string, unknown> = {
     "parentGuid": "",
     "pinnedCertSha256": "",
     "port": 2053,
+    "provisionError": "",
+    "provisionStatus": "",
+    "region": "",
     "remark": "",
     "scheme": "https",
+    "sshFingerprint": "",
+    "sshPort": 0,
+    "sshUsername": "",
     "status": "online",
     "tlsVerifyMode": "verify",
     "transitive": false,
@@ -939,6 +945,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "address": "",
     "allowPrivateAddress": false,
     "apiToken": null,
+    "autoInstall": false,
     "basePath": "",
     "clearApiToken": false,
     "enable": false,
@@ -951,9 +958,28 @@ export const EXAMPLES: Record<string, unknown> = {
     "outboundTag": "",
     "pinnedCertSha256": "",
     "port": 1,
+    "region": "iran",
     "remark": "",
     "scheme": "http",
+    "ssh": null,
     "tlsVerifyMode": "verify"
+  },
+  "NodeSSHFingerprint": {
+    "fingerprint": "",
+    "keyType": ""
+  },
+  "NodeSSHProbeRequest": {
+    "address": "",
+    "allowPrivateAddress": false,
+    "port": 1
+  },
+  "NodeSSHRequest": {
+    "fingerprint": "",
+    "password": null,
+    "port": 0,
+    "privateKey": null,
+    "trustConfirmed": false,
+    "username": ""
   },
   "NodeView": {
     "activeCount": 20,
@@ -970,6 +996,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "enable": true,
     "guid": "node-guid",
     "hasApiToken": true,
+    "hasSSHCredentials": false,
     "id": 1,
     "inboundCount": 3,
     "inboundSyncMode": "all",
@@ -989,8 +1016,14 @@ export const EXAMPLES: Record<string, unknown> = {
     "parentGuid": "",
     "pinnedCertSha256": "",
     "port": 2053,
+    "provisionError": "",
+    "provisionStatus": "",
+    "region": "iran",
     "remark": "Primary edge",
     "scheme": "https",
+    "sshFingerprint": "",
+    "sshPort": 22,
+    "sshUsername": "root",
     "status": "online",
     "tlsVerifyMode": "verify",
     "transitive": false,
@@ -1138,6 +1171,38 @@ export const EXAMPLES: Record<string, unknown> = {
         "until": "2026-11-01T00:00:00Z"
       }
     ]
+  },
+  "StoreAdminState": {
+    "config": {
+      "enabled": false,
+      "id": 0,
+      "paymentText": "",
+      "supportURL": ""
+    },
+    "plans": [
+      {
+        "days": 0,
+        "enabled": false,
+        "id": 0,
+        "name": "",
+        "price": 0,
+        "quotaBytes": 0
+      }
+    ]
+  },
+  "StoreConfig": {
+    "enabled": false,
+    "id": 0,
+    "paymentText": "",
+    "supportURL": ""
+  },
+  "StorePlan": {
+    "days": 0,
+    "enabled": false,
+    "id": 0,
+    "name": "",
+    "price": 0,
+    "quotaBytes": 0
   },
   "SubBalancer": {
     "createdAt": 1710000000000,

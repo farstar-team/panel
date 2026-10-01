@@ -841,8 +841,14 @@ export interface Node {
   parentGuid?: string;
   pinnedCertSha256: string;
   port: number;
+  provisionError: string;
+  provisionStatus: string;
+  region: string;
   remark: string;
   scheme: string;
+  sshFingerprint: string;
+  sshPort: number;
+  sshUsername: string;
   status: string;
   tlsVerifyMode: string;
   transitive?: boolean;
@@ -857,6 +863,7 @@ export interface NodeMutationRequest {
   address: string;
   allowPrivateAddress: boolean;
   apiToken?: string | null;
+  autoInstall: boolean;
   basePath: string;
   clearApiToken?: boolean;
   enable: boolean;
@@ -867,9 +874,31 @@ export interface NodeMutationRequest {
   outboundTag: string;
   pinnedCertSha256: string;
   port: number;
+  region: string;
   remark: string;
   scheme: string;
+  ssh?: NodeSSHRequest | null;
   tlsVerifyMode: string;
+}
+
+export interface NodeSSHFingerprint {
+  fingerprint: string;
+  keyType: string;
+}
+
+export interface NodeSSHProbeRequest {
+  address: string;
+  allowPrivateAddress: boolean;
+  port: number;
+}
+
+export interface NodeSSHRequest {
+  fingerprint: string;
+  password?: string | null;
+  port: number;
+  privateKey?: string | null;
+  trustConfirmed: boolean;
+  username: string;
 }
 
 export interface NodeView {
@@ -887,6 +916,7 @@ export interface NodeView {
   enable: boolean;
   guid: string;
   hasApiToken: boolean;
+  hasSSHCredentials: boolean;
   id: number;
   inboundCount: number;
   inboundSyncMode: string;
@@ -904,8 +934,14 @@ export interface NodeView {
   parentGuid?: string;
   pinnedCertSha256: string;
   port: number;
+  provisionError: string;
+  provisionStatus: string;
+  region: string;
   remark: string;
   scheme: string;
+  sshFingerprint: string;
+  sshPort: number;
+  sshUsername: string;
   status: string;
   tlsVerifyMode: string;
   transitive?: boolean;
@@ -1043,6 +1079,27 @@ export interface Sponsor {
 export interface SponsorList {
   contact?: string;
   sponsors: Sponsor[];
+}
+
+export interface StoreAdminState {
+  config: StoreConfig;
+  plans: StorePlan[];
+}
+
+export interface StoreConfig {
+  enabled: boolean;
+  id: number;
+  paymentText: string;
+  supportURL: string;
+}
+
+export interface StorePlan {
+  days: number;
+  enabled: boolean;
+  id: number;
+  name: string;
+  price: number;
+  quotaBytes: number;
 }
 
 export interface SubBalancer {

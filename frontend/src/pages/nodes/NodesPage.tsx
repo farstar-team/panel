@@ -30,7 +30,6 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useNodesQuery } from '@/api/queries/useNodesQuery';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import { useNodeMutations } from '@/api/queries/useNodeMutations';
-import AppSidebar from '@/layouts/AppSidebar';
 import NodeList from './NodeList';
 import NodeFormModal from './NodeFormModal';
 import { setMessageInstance } from '@/utils/messageBus';
@@ -286,8 +285,6 @@ export default function NodesPage() {
       {messageContextHolder}
       {modalContextHolder}
       <Layout className={pageClass}>
-        <AppSidebar />
-
         <Layout className="content-shell">
           <Layout.Content id="content-layout" className="content-area">
             <Spin spinning={!fetched} delay={200} description={t('loading')} size="large">
@@ -305,65 +302,88 @@ export default function NodesPage() {
                   }
                 />
               ) : (
-                <Row gutter={[isMobile ? 8 : 16, isMobile ? 8 : 12]}>
-                  <Col span={24}>
-                    <Card size="small" hoverable className="summary-card">
-                      <Row gutter={[16, isMobile ? 16 : 12]}>
-                        <Col xs={12} sm={12} md={6}>
-                          <Statistic
-                            title={t('pages.nodes.totalNodes')}
-                            value={String(totals.total)}
-                            prefix={<CloudServerOutlined />}
-                          />
-                        </Col>
-                        <Col xs={12} sm={12} md={6}>
-                          <Statistic
-                            title={t('pages.nodes.onlineNodes')}
-                            value={String(totals.online)}
-                            prefix={
-                              <CheckCircleOutlined style={{ color: 'var(--ant-color-success)' }} />
-                            }
-                          />
-                        </Col>
-                        <Col xs={12} sm={12} md={6}>
-                          <Statistic
-                            title={t('pages.nodes.offlineNodes')}
-                            value={String(totals.offline)}
-                            prefix={
-                              <CloseCircleOutlined style={{ color: 'var(--ant-color-error)' }} />
-                            }
-                          />
-                        </Col>
-                        <Col xs={12} sm={12} md={6}>
-                          <Statistic
-                            title={t('pages.nodes.avgLatency')}
-                            value={totals.avgLatency > 0 ? `${totals.avgLatency} ms` : '-'}
-                            prefix={<ThunderboltOutlined />}
-                          />
-                        </Col>
-                      </Row>
-                    </Card>
-                  </Col>
+                <>
+                  <div style={{ display: 'grid', gap: 12, marginBottom: 16 }}>
+                    {nodes
+                      .filter((n) => n.provisionStatus)
+                      .map((n) => (
+                        <Alert
+                          key={n.id}
+                          showIcon
+                          type={
+                            n.provisionStatus === 'failed'
+                              ? 'error'
+                              : n.provisionStatus === 'ready'
+                                ? 'success'
+                                : 'info'
+                          }
+                          title={`${n.name}: ${t(({ pending: 'farstarNodes.pending', running: 'farstarNodes.running', ready: 'farstarNodes.ready', failed: 'farstarNodes.failed' } as Record<string, string>)[n.provisionStatus || ''] || 'status')}`}
+                          description={n.provisionError || undefined}
+                        />
+                      ))}
+                  </div>
+                  <Row gutter={[isMobile ? 8 : 16, isMobile ? 8 : 12]}>
+                    <Col span={24}>
+                      <Card size="small" hoverable className="summary-card">
+                        <Row gutter={[16, isMobile ? 16 : 12]}>
+                          <Col xs={12} sm={12} md={6}>
+                            <Statistic
+                              title={t('pages.nodes.totalNodes')}
+                              value={String(totals.total)}
+                              prefix={<CloudServerOutlined />}
+                            />
+                          </Col>
+                          <Col xs={12} sm={12} md={6}>
+                            <Statistic
+                              title={t('pages.nodes.onlineNodes')}
+                              value={String(totals.online)}
+                              prefix={
+                                <CheckCircleOutlined
+                                  style={{ color: 'var(--ant-color-success)' }}
+                                />
+                              }
+                            />
+                          </Col>
+                          <Col xs={12} sm={12} md={6}>
+                            <Statistic
+                              title={t('pages.nodes.offlineNodes')}
+                              value={String(totals.offline)}
+                              prefix={
+                                <CloseCircleOutlined style={{ color: 'var(--ant-color-error)' }} />
+                              }
+                            />
+                          </Col>
+                          <Col xs={12} sm={12} md={6}>
+                            <Statistic
+                              title={t('pages.nodes.avgLatency')}
+                              value={totals.avgLatency > 0 ? `${totals.avgLatency} ms` : '-'}
+                              prefix={<ThunderboltOutlined />}
+                            />
+                          </Col>
+                        </Row>
+                      </Card>
+                    </Col>
 
-                  <Col span={24}>
-                    <NodeList
-                      nodes={nodes}
-                      loading={loading}
-                      isMobile={isMobile}
-                      latestVersion={latestVersion}
-                      selectedIds={selectedIds}
-                      onSelectionChange={setSelectedIds}
-                      onAdd={onAdd}
-                      onMtls={() => setMtlsOpen(true)}
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                      onProbe={onProbe}
-                      onToggleEnable={onToggleEnable}
-                      onUpdateNode={onUpdateNode}
-                      onUpdateSelected={onUpdateSelected}
-                    />
-                  </Col>
-                </Row>
+                    <Col span={24}>
+                      <NodeList
+                        nodes={nodes}
+                        loading={loading}
+                        isMobile={isMobile}
+                        latestVersion={latestVersion}
+                        selectedIds={selectedIds}
+                        onSelectionChange={setSelectedIds}
+                        onAdd={onAdd}
+                        onMtls={() => setMtlsOpen(true)}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onProbe={onProbe}
+                        onToggleEnable={onToggleEnable}
+                        onUpdateNode={onUpdateNode}
+                        onUpdateSelected={onUpdateSelected}
+                      />
+                    </Col>
+                  </Row>
+                </>
               )}
             </Spin>
           </Layout.Content>

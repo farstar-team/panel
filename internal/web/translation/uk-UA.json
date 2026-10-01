@@ -1,4 +1,7 @@
 {
+  "farstarHome": {"title":"Your network, at a glance","caption":"Manage customers, publish connections and run your VPN store from one workspace.","manageClients":"Manage customers","manageConnections":"Manage connections","system":"Server diagnostics"},
+  "farstarNodes": {"region":"Server location","iran":"Iran","abroad":"Outside Iran","ssh":"SSH management","privateKey":"SSH private key","fingerprint":"SSH host fingerprint","verify":"I compared this fingerprint with the server console","autoInstall":"Install and register this fresh server automatically","installHelp":"Fresh Ubuntu/Debian servers only. Existing panels or databases are never overwritten. TLS is pinned; SSH credentials are encrypted.","secretHelp":"Blank secrets keep the stored credential. Choose a password OR an unencrypted private key.","fetchFingerprint":"Read SSH fingerprint","pending":"Installation queued","running":"Installing node","ready":"Installed and connected","failed":"Installation needs attention"},
+  "farstarStore": {"title":"VPN store","plans":"Sales plans","payment":"Payment instructions","support":"Support link","sales":"Accept new orders","notice":"Payments require your manual review in Telegram. Changing a plan never changes an existing order.","planName":"Plan name","price":"Price (toman)","quota":"Traffic (GB)","days":"Duration (days)","addPlan":"Add plan"},
   "farstar": {"trafficMultiplier":"Inbound traffic multiplier","trafficMultiplierHelp":"A multiplier of 2 charges 2 GB of shared quota for 1 GB transferred on this inbound. Other inbounds are billed at their own rate."},
   "username": "Ім'я користувача",
   "password": "Пароль",
@@ -120,13 +123,10 @@
     "routing": "Маршрутизація",
     "outbounds": "Вихідні",
     "apiDocs": "Документація API",
-    "donate": "Підтримати",
     "sponsors": "Спонсори",
     "hosts": "Хости",
     "docs": "Документація",
     "openMenu": "Відкрити меню",
-    "pinSidebar": "Закріпити бічну панель",
-    "unpinSidebar": "Відкріпити бічну панель",
     "subFormats": "Формати підписки"
   },
   "pages": {

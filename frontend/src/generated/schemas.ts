@@ -3616,6 +3616,15 @@ export const SCHEMAS: Record<string, unknown> = {
         "minimum": 1,
         "type": "integer"
       },
+      "provisionError": {
+        "type": "string"
+      },
+      "provisionStatus": {
+        "type": "string"
+      },
+      "region": {
+        "type": "string"
+      },
       "remark": {
         "type": "string"
       },
@@ -3625,6 +3634,15 @@ export const SCHEMAS: Record<string, unknown> = {
           "https"
         ],
         "example": "https",
+        "type": "string"
+      },
+      "sshFingerprint": {
+        "type": "string"
+      },
+      "sshPort": {
+        "type": "integer"
+      },
+      "sshUsername": {
         "type": "string"
       },
       "status": {
@@ -3696,8 +3714,14 @@ export const SCHEMAS: Record<string, unknown> = {
       "panelVersion",
       "pinnedCertSha256",
       "port",
+      "provisionError",
+      "provisionStatus",
+      "region",
       "remark",
       "scheme",
+      "sshFingerprint",
+      "sshPort",
+      "sshUsername",
       "status",
       "tlsVerifyMode",
       "updatedAt",
@@ -3720,6 +3744,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "apiToken": {
         "nullable": true,
         "type": "string"
+      },
+      "autoInstall": {
+        "type": "boolean"
       },
       "basePath": {
         "type": "string"
@@ -3760,6 +3787,13 @@ export const SCHEMAS: Record<string, unknown> = {
         "minimum": 1,
         "type": "integer"
       },
+      "region": {
+        "enum": [
+          "iran",
+          "abroad"
+        ],
+        "type": "string"
+      },
       "remark": {
         "type": "string"
       },
@@ -3769,6 +3803,14 @@ export const SCHEMAS: Record<string, unknown> = {
           "https"
         ],
         "type": "string"
+      },
+      "ssh": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NodeSSHRequest"
+          }
+        ],
+        "nullable": true
       },
       "tlsVerifyMode": {
         "enum": [
@@ -3783,6 +3825,7 @@ export const SCHEMAS: Record<string, unknown> = {
     "required": [
       "address",
       "allowPrivateAddress",
+      "autoInstall",
       "basePath",
       "enable",
       "id",
@@ -3792,9 +3835,77 @@ export const SCHEMAS: Record<string, unknown> = {
       "outboundTag",
       "pinnedCertSha256",
       "port",
+      "region",
       "remark",
       "scheme",
       "tlsVerifyMode"
+    ],
+    "type": "object"
+  },
+  "NodeSSHFingerprint": {
+    "properties": {
+      "fingerprint": {
+        "type": "string"
+      },
+      "keyType": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "fingerprint",
+      "keyType"
+    ],
+    "type": "object"
+  },
+  "NodeSSHProbeRequest": {
+    "properties": {
+      "address": {
+        "type": "string"
+      },
+      "allowPrivateAddress": {
+        "type": "boolean"
+      },
+      "port": {
+        "maximum": 65535,
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "address",
+      "allowPrivateAddress",
+      "port"
+    ],
+    "type": "object"
+  },
+  "NodeSSHRequest": {
+    "properties": {
+      "fingerprint": {
+        "type": "string"
+      },
+      "password": {
+        "nullable": true,
+        "type": "string"
+      },
+      "port": {
+        "type": "integer"
+      },
+      "privateKey": {
+        "nullable": true,
+        "type": "string"
+      },
+      "trustConfirmed": {
+        "type": "boolean"
+      },
+      "username": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "fingerprint",
+      "port",
+      "trustConfirmed",
+      "username"
     ],
     "type": "object"
   },
@@ -3857,6 +3968,9 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "hasApiToken": {
         "example": true,
+        "type": "boolean"
+      },
+      "hasSSHCredentials": {
         "type": "boolean"
       },
       "id": {
@@ -3932,12 +4046,33 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 2053,
         "type": "integer"
       },
+      "provisionError": {
+        "type": "string"
+      },
+      "provisionStatus": {
+        "type": "string"
+      },
+      "region": {
+        "example": "iran",
+        "type": "string"
+      },
       "remark": {
         "example": "Primary edge",
         "type": "string"
       },
       "scheme": {
         "example": "https",
+        "type": "string"
+      },
+      "sshFingerprint": {
+        "type": "string"
+      },
+      "sshPort": {
+        "example": 22,
+        "type": "integer"
+      },
+      "sshUsername": {
+        "example": "root",
         "type": "string"
       },
       "status": {
@@ -3989,6 +4124,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "enable",
       "guid",
       "hasApiToken",
+      "hasSSHCredentials",
       "id",
       "inboundCount",
       "inboundSyncMode",
@@ -4005,8 +4141,14 @@ export const SCHEMAS: Record<string, unknown> = {
       "panelVersion",
       "pinnedCertSha256",
       "port",
+      "provisionError",
+      "provisionStatus",
+      "region",
       "remark",
       "scheme",
+      "sshFingerprint",
+      "sshPort",
+      "sshUsername",
       "status",
       "tlsVerifyMode",
       "updatedAt",
@@ -4556,6 +4698,80 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     "required": [
       "sponsors"
+    ],
+    "type": "object"
+  },
+  "StoreAdminState": {
+    "properties": {
+      "config": {
+        "$ref": "#/components/schemas/StoreConfig"
+      },
+      "plans": {
+        "items": {
+          "$ref": "#/components/schemas/StorePlan"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "config",
+      "plans"
+    ],
+    "type": "object"
+  },
+  "StoreConfig": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "id": {
+        "type": "integer"
+      },
+      "paymentText": {
+        "type": "string"
+      },
+      "supportURL": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "enabled",
+      "id",
+      "paymentText",
+      "supportURL"
+    ],
+    "type": "object"
+  },
+  "StorePlan": {
+    "properties": {
+      "days": {
+        "type": "integer"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "id": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "price": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "quotaBytes": {
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "days",
+      "enabled",
+      "id",
+      "name",
+      "price",
+      "quotaBytes"
     ],
     "type": "object"
   },

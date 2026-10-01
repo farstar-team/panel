@@ -3642,6 +3642,15 @@
             "minimum": 1,
             "type": "integer"
           },
+          "provisionError": {
+            "type": "string"
+          },
+          "provisionStatus": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
           "remark": {
             "type": "string"
           },
@@ -3651,6 +3660,15 @@
               "https"
             ],
             "example": "https",
+            "type": "string"
+          },
+          "sshFingerprint": {
+            "type": "string"
+          },
+          "sshPort": {
+            "type": "integer"
+          },
+          "sshUsername": {
             "type": "string"
           },
           "status": {
@@ -3722,8 +3740,14 @@
           "panelVersion",
           "pinnedCertSha256",
           "port",
+          "provisionError",
+          "provisionStatus",
+          "region",
           "remark",
           "scheme",
+          "sshFingerprint",
+          "sshPort",
+          "sshUsername",
           "status",
           "tlsVerifyMode",
           "updatedAt",
@@ -3746,6 +3770,9 @@
           "apiToken": {
             "nullable": true,
             "type": "string"
+          },
+          "autoInstall": {
+            "type": "boolean"
           },
           "basePath": {
             "type": "string"
@@ -3786,6 +3813,13 @@
             "minimum": 1,
             "type": "integer"
           },
+          "region": {
+            "enum": [
+              "iran",
+              "abroad"
+            ],
+            "type": "string"
+          },
           "remark": {
             "type": "string"
           },
@@ -3795,6 +3829,14 @@
               "https"
             ],
             "type": "string"
+          },
+          "ssh": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NodeSSHRequest"
+              }
+            ],
+            "nullable": true
           },
           "tlsVerifyMode": {
             "enum": [
@@ -3809,6 +3851,7 @@
         "required": [
           "address",
           "allowPrivateAddress",
+          "autoInstall",
           "basePath",
           "enable",
           "id",
@@ -3818,9 +3861,77 @@
           "outboundTag",
           "pinnedCertSha256",
           "port",
+          "region",
           "remark",
           "scheme",
           "tlsVerifyMode"
+        ],
+        "type": "object"
+      },
+      "NodeSSHFingerprint": {
+        "properties": {
+          "fingerprint": {
+            "type": "string"
+          },
+          "keyType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fingerprint",
+          "keyType"
+        ],
+        "type": "object"
+      },
+      "NodeSSHProbeRequest": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "allowPrivateAddress": {
+            "type": "boolean"
+          },
+          "port": {
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "address",
+          "allowPrivateAddress",
+          "port"
+        ],
+        "type": "object"
+      },
+      "NodeSSHRequest": {
+        "properties": {
+          "fingerprint": {
+            "type": "string"
+          },
+          "password": {
+            "nullable": true,
+            "type": "string"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "privateKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "trustConfirmed": {
+            "type": "boolean"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fingerprint",
+          "port",
+          "trustConfirmed",
+          "username"
         ],
         "type": "object"
       },
@@ -3883,6 +3994,9 @@
           },
           "hasApiToken": {
             "example": true,
+            "type": "boolean"
+          },
+          "hasSSHCredentials": {
             "type": "boolean"
           },
           "id": {
@@ -3958,12 +4072,33 @@
             "example": 2053,
             "type": "integer"
           },
+          "provisionError": {
+            "type": "string"
+          },
+          "provisionStatus": {
+            "type": "string"
+          },
+          "region": {
+            "example": "iran",
+            "type": "string"
+          },
           "remark": {
             "example": "Primary edge",
             "type": "string"
           },
           "scheme": {
             "example": "https",
+            "type": "string"
+          },
+          "sshFingerprint": {
+            "type": "string"
+          },
+          "sshPort": {
+            "example": 22,
+            "type": "integer"
+          },
+          "sshUsername": {
+            "example": "root",
             "type": "string"
           },
           "status": {
@@ -4015,6 +4150,7 @@
           "enable",
           "guid",
           "hasApiToken",
+          "hasSSHCredentials",
           "id",
           "inboundCount",
           "inboundSyncMode",
@@ -4031,8 +4167,14 @@
           "panelVersion",
           "pinnedCertSha256",
           "port",
+          "provisionError",
+          "provisionStatus",
+          "region",
           "remark",
           "scheme",
+          "sshFingerprint",
+          "sshPort",
+          "sshUsername",
           "status",
           "tlsVerifyMode",
           "updatedAt",
@@ -4585,6 +4727,80 @@
         ],
         "type": "object"
       },
+      "StoreAdminState": {
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/StoreConfig"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/StorePlan"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "config",
+          "plans"
+        ],
+        "type": "object"
+      },
+      "StoreConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "paymentText": {
+            "type": "string"
+          },
+          "supportURL": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "id",
+          "paymentText",
+          "supportURL"
+        ],
+        "type": "object"
+      },
+      "StorePlan": {
+        "properties": {
+          "days": {
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "quotaBytes": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "days",
+          "enabled",
+          "id",
+          "name",
+          "price",
+          "quotaBytes"
+        ],
+        "type": "object"
+      },
       "SubBalancer": {
         "description": "SubBalancer is one extra JSON-subscription config document whose members are\nthe selected inbounds' proxy outbounds. SortOrder shares SubSortIndex semantics.",
         "properties": {
@@ -4874,6 +5090,10 @@
     {
       "name": "Subscription Server",
       "description": "A separate HTTP/HTTPS server that serves proxy subscription links (standard, JSON, and Clash) to clients. The server listens on its own port (default 2096) and is configured in Settings → Subscription. Fresh panels generate random path prefixes for each format; all paths remain configurable. Every subscription endpoint sets response headers for client apps to read traffic/expiry info."
+    },
+    {
+      "name": "FARSTAR Store",
+      "description": ""
     },
     {
       "name": "WebSocket",
@@ -10962,6 +11182,7 @@
                       "enable": true,
                       "guid": "node-guid",
                       "hasApiToken": true,
+                      "hasSSHCredentials": false,
                       "id": 1,
                       "inboundCount": 3,
                       "inboundSyncMode": "all",
@@ -10981,8 +11202,14 @@
                       "parentGuid": "",
                       "pinnedCertSha256": "",
                       "port": 2053,
+                      "provisionError": "",
+                      "provisionStatus": "",
+                      "region": "iran",
                       "remark": "Primary edge",
                       "scheme": "https",
+                      "sshFingerprint": "",
+                      "sshPort": 22,
+                      "sshUsername": "root",
                       "status": "online",
                       "tlsVerifyMode": "verify",
                       "transitive": false,
@@ -11163,6 +11390,7 @@
                     "enable": true,
                     "guid": "node-guid",
                     "hasApiToken": true,
+                    "hasSSHCredentials": false,
                     "id": 1,
                     "inboundCount": 3,
                     "inboundSyncMode": "all",
@@ -11182,8 +11410,14 @@
                     "parentGuid": "",
                     "pinnedCertSha256": "",
                     "port": 2053,
+                    "provisionError": "",
+                    "provisionStatus": "",
+                    "region": "iran",
                     "remark": "Primary edge",
                     "scheme": "https",
+                    "sshFingerprint": "",
+                    "sshPort": 22,
+                    "sshUsername": "root",
                     "status": "online",
                     "tlsVerifyMode": "verify",
                     "transitive": false,
@@ -11313,6 +11547,7 @@
                     "enable": true,
                     "guid": "node-guid",
                     "hasApiToken": true,
+                    "hasSSHCredentials": false,
                     "id": 1,
                     "inboundCount": 3,
                     "inboundSyncMode": "all",
@@ -11332,8 +11567,14 @@
                     "parentGuid": "",
                     "pinnedCertSha256": "",
                     "port": 2053,
+                    "provisionError": "",
+                    "provisionStatus": "",
+                    "region": "iran",
                     "remark": "Primary edge",
                     "scheme": "https",
+                    "sshFingerprint": "",
+                    "sshPort": 22,
+                    "sshUsername": "root",
                     "status": "online",
                     "tlsVerifyMode": "verify",
                     "transitive": false,
@@ -11564,6 +11805,73 @@
                     "xrayError": "",
                     "xrayState": "",
                     "xrayVersion": "25.10.31"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/sshFingerprint": {
+      "post": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Read the SSH host fingerprint without sending credentials. Compare it with the server console before explicitly trusting it.",
+        "operationId": "post_panel_api_nodes_sshFingerprint",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "type": "string",
+                    "description": ""
+                  },
+                  "port": {
+                    "type": "integer",
+                    "description": ""
+                  },
+                  "allowPrivateAddress": {
+                    "type": "boolean",
+                    "description": ""
+                  }
+                },
+                "required": [
+                  "address",
+                  "port"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NodeSSHFingerprint"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "fingerprint": "",
+                    "keyType": ""
                   }
                 }
               }
@@ -15657,6 +15965,190 @@
         }
       }
     },
+    "/panel/api/store/state": {
+      "get": {
+        "tags": [
+          "FARSTAR Store"
+        ],
+        "summary": "Read store settings and all plans, including disabled plans. Admin only.",
+        "operationId": "get_panel_api_store_state",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/StoreAdminState"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "config": {
+                      "enabled": false,
+                      "id": 0,
+                      "paymentText": "",
+                      "supportURL": ""
+                    },
+                    "plans": [
+                      {
+                        "days": 0,
+                        "enabled": false,
+                        "id": 0,
+                        "name": "",
+                        "price": 0,
+                        "quotaBytes": 0
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/store/settings": {
+      "post": {
+        "tags": [
+          "FARSTAR Store"
+        ],
+        "summary": "Configure sales, payment text and Telegram support URL. Enabling requires bot, subscription, payment and an active plan.",
+        "operationId": "post_panel_api_store_settings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "description": ""
+                  },
+                  "paymentText": {
+                    "type": "string",
+                    "description": ""
+                  },
+                  "supportURL": {
+                    "type": "string",
+                    "description": ""
+                  }
+                },
+                "required": [
+                  "enabled",
+                  "paymentText"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/store/plan": {
+      "post": {
+        "tags": [
+          "FARSTAR Store"
+        ],
+        "summary": "Create (id=0) or edit a plan. Existing orders retain their original price, quota and duration.",
+        "operationId": "post_panel_api_store_plan",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": ""
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": ""
+                  },
+                  "price": {
+                    "type": "integer",
+                    "description": "Price in toman."
+                  },
+                  "quotaBytes": {
+                    "type": "integer",
+                    "description": ""
+                  },
+                  "days": {
+                    "type": "integer",
+                    "description": ""
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "description": ""
+                  }
+                },
+                "required": [
+                  "name",
+                  "price",
+                  "quotaBytes",
+                  "days",
+                  "enabled"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/ws": {
       "get": {
         "tags": [
@@ -16350,6 +16842,7 @@
                   "enable": true,
                   "guid": "node-guid",
                   "hasApiToken": true,
+                  "hasSSHCredentials": false,
                   "id": 1,
                   "inboundCount": 3,
                   "inboundSyncMode": "all",
@@ -16369,8 +16862,14 @@
                   "parentGuid": "",
                   "pinnedCertSha256": "",
                   "port": 2053,
+                  "provisionError": "",
+                  "provisionStatus": "",
+                  "region": "iran",
                   "remark": "Primary edge",
                   "scheme": "https",
+                  "sshFingerprint": "",
+                  "sshPort": 22,
+                  "sshUsername": "root",
                   "status": "online",
                   "tlsVerifyMode": "verify",
                   "transitive": false,

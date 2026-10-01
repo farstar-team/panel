@@ -584,6 +584,9 @@ func (s *Server) start(restartXray bool, startTgBot bool) (err error) {
 		return tls.X509KeyPair(ck.CertPEM, ck.KeyPEM)
 	})
 
+	if err := (&service.NodeService{}).InterruptPendingInstallations(); err != nil {
+		return err
+	}
 	engine, err := s.initRouter()
 	if err != nil {
 		return err

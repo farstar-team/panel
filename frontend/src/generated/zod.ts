@@ -894,8 +894,14 @@ export const NodeSchema = z.object({
   parentGuid: z.string().optional(),
   pinnedCertSha256: z.string(),
   port: z.number().int().min(1).max(65535),
+  provisionError: z.string(),
+  provisionStatus: z.string(),
+  region: z.string(),
   remark: z.string(),
   scheme: z.enum(['http', 'https']),
+  sshFingerprint: z.string(),
+  sshPort: z.number().int(),
+  sshUsername: z.string(),
   status: z.string(),
   tlsVerifyMode: z.enum(['verify', 'skip', 'pin', 'mtls']),
   transitive: z.boolean().optional(),
@@ -911,6 +917,7 @@ export const NodeMutationRequestSchema = z.object({
   address: z.string(),
   allowPrivateAddress: z.boolean(),
   apiToken: z.string().nullable().optional(),
+  autoInstall: z.boolean(),
   basePath: z.string(),
   clearApiToken: z.boolean().optional(),
   enable: z.boolean(),
@@ -921,11 +928,36 @@ export const NodeMutationRequestSchema = z.object({
   outboundTag: z.string(),
   pinnedCertSha256: z.string(),
   port: z.number().int().min(1).max(65535),
+  region: z.enum(['iran', 'abroad']),
   remark: z.string(),
   scheme: z.enum(['http', 'https']),
+  ssh: z.lazy(() => NodeSSHRequestSchema).nullable().optional(),
   tlsVerifyMode: z.enum(['verify', 'skip', 'pin', 'mtls']),
 });
 export type NodeMutationRequest = z.infer<typeof NodeMutationRequestSchema>;
+
+export const NodeSSHFingerprintSchema = z.object({
+  fingerprint: z.string(),
+  keyType: z.string(),
+});
+export type NodeSSHFingerprint = z.infer<typeof NodeSSHFingerprintSchema>;
+
+export const NodeSSHProbeRequestSchema = z.object({
+  address: z.string(),
+  allowPrivateAddress: z.boolean(),
+  port: z.number().int().min(1).max(65535),
+});
+export type NodeSSHProbeRequest = z.infer<typeof NodeSSHProbeRequestSchema>;
+
+export const NodeSSHRequestSchema = z.object({
+  fingerprint: z.string(),
+  password: z.string().nullable().optional(),
+  port: z.number().int(),
+  privateKey: z.string().nullable().optional(),
+  trustConfirmed: z.boolean(),
+  username: z.string(),
+});
+export type NodeSSHRequest = z.infer<typeof NodeSSHRequestSchema>;
 
 export const NodeViewSchema = z.object({
   activeCount: z.number().int(),
@@ -942,6 +974,7 @@ export const NodeViewSchema = z.object({
   enable: z.boolean(),
   guid: z.string(),
   hasApiToken: z.boolean(),
+  hasSSHCredentials: z.boolean(),
   id: z.number().int(),
   inboundCount: z.number().int(),
   inboundSyncMode: z.string(),
@@ -959,8 +992,14 @@ export const NodeViewSchema = z.object({
   parentGuid: z.string().optional(),
   pinnedCertSha256: z.string(),
   port: z.number().int(),
+  provisionError: z.string(),
+  provisionStatus: z.string(),
+  region: z.string(),
   remark: z.string(),
   scheme: z.string(),
+  sshFingerprint: z.string(),
+  sshPort: z.number().int(),
+  sshUsername: z.string(),
   status: z.string(),
   tlsVerifyMode: z.string(),
   transitive: z.boolean().optional(),
@@ -1109,6 +1148,30 @@ export const SponsorListSchema = z.object({
   sponsors: z.array(z.lazy(() => SponsorSchema)),
 });
 export type SponsorList = z.infer<typeof SponsorListSchema>;
+
+export const StoreAdminStateSchema = z.object({
+  config: z.lazy(() => StoreConfigSchema),
+  plans: z.array(z.lazy(() => StorePlanSchema)),
+});
+export type StoreAdminState = z.infer<typeof StoreAdminStateSchema>;
+
+export const StoreConfigSchema = z.object({
+  enabled: z.boolean(),
+  id: z.number().int(),
+  paymentText: z.string(),
+  supportURL: z.string(),
+});
+export type StoreConfig = z.infer<typeof StoreConfigSchema>;
+
+export const StorePlanSchema = z.object({
+  days: z.number().int(),
+  enabled: z.boolean(),
+  id: z.number().int(),
+  name: z.string(),
+  price: z.number().int(),
+  quotaBytes: z.number().int(),
+});
+export type StorePlan = z.infer<typeof StorePlanSchema>;
 
 export const SubBalancerSchema = z.object({
   createdAt: z.number().int(),

@@ -23,6 +23,7 @@ export interface RemoteInboundOption {
 }
 
 export function useNodeMutations() {
+  const nodeJsonOptions = { headers: { 'Content-Type': 'application/json' } };
   const queryClient = useQueryClient();
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: keys.nodes.root() });
@@ -30,7 +31,8 @@ export function useNodeMutations() {
   };
 
   const createMut = useMutation({
-    mutationFn: (payload: Partial<NodeRecord>) => HttpUtil.post('/panel/api/nodes/add', payload),
+    mutationFn: (payload: Partial<NodeRecord>) =>
+      HttpUtil.post('/panel/api/nodes/add', payload, nodeJsonOptions),
     onSuccess: (msg) => {
       if (msg?.success) invalidate();
     },
@@ -38,7 +40,7 @@ export function useNodeMutations() {
 
   const updateMut = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: Partial<NodeRecord> }) =>
-      HttpUtil.post(`/panel/api/nodes/update/${id}`, payload),
+      HttpUtil.post(`/panel/api/nodes/update/${id}`, payload, nodeJsonOptions),
     onSuccess: (msg) => {
       if (msg?.success) invalidate();
     },
@@ -92,12 +94,12 @@ export function useNodeMutations() {
     updatePanels: (ids: number[], dev: boolean): Promise<Msg<NodeUpdateResult[]>> =>
       updatePanelsMut.mutateAsync({ ids, dev }),
     testConnection: async (payload: Partial<NodeRecord>): Promise<Msg<ProbeResult>> => {
-      const raw = await HttpUtil.post('/panel/api/nodes/test', payload);
+      const raw = await HttpUtil.post('/panel/api/nodes/test', payload, nodeJsonOptions);
       return parseMsg(raw, ProbeResultSchema, 'nodes/test');
     },
     fetchFingerprint: (payload: Partial<NodeRecord>): Promise<Msg<string>> =>
-      HttpUtil.post<string>('/panel/api/nodes/certFingerprint', payload),
+      HttpUtil.post<string>('/panel/api/nodes/certFingerprint', payload, nodeJsonOptions),
     fetchInbounds: (payload: Partial<NodeRecord>): Promise<Msg<RemoteInboundOption[]>> =>
-      HttpUtil.post<RemoteInboundOption[]>('/panel/api/nodes/inbounds', payload),
+      HttpUtil.post<RemoteInboundOption[]>('/panel/api/nodes/inbounds', payload, nodeJsonOptions),
   };
 }

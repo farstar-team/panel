@@ -1,9 +1,175 @@
 body.light {
   background: #f5f6f8;
 }
-body .content-shell {
-  max-width: 1500px;
-  padding: 32px;
+.farstar-shell {
+  display: flex;
+  min-block-size: 100dvh;
+  background: var(--ant-color-bg-layout);
+}
+.farstar-workspace {
+  flex: 1;
+  min-inline-size: 0;
+}
+.farstar-intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-block: 18px 30px;
+}
+.farstar-eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--ant-color-primary);
+}
+.farstar-intro h2 {
+  font-size: clamp(24px, 2.7vw, 36px);
+  margin-block: 12px;
+  font-weight: 700;
+}
+.farstar-intro p {
+  margin: 0;
+  color: var(--ant-color-text-secondary);
+  line-height: 1.9;
+}
+.farstar-shortcuts {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.farstar-business-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.farstar-business-stat {
+  min-inline-size: 0;
+}
+.farstar-stat-index {
+  display: block;
+  color: var(--ant-color-text-tertiary);
+  font-family: monospace;
+  margin-block-end: 22px;
+}
+body .farstar-business-stat .ant-statistic-content {
+  font-size: 38px;
+  font-weight: 700;
+}
+.farstar-system-details {
+  margin-block-start: 28px;
+  border-block-start: 1px solid var(--ant-color-border-secondary);
+}
+.farstar-system-details > summary {
+  cursor: pointer;
+  padding-block: 22px;
+  color: var(--ant-color-text-secondary);
+  font-size: 14px;
+}
+@media (max-width: 1100px) {
+  .farstar-business-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .farstar-business-stats {
+    gap: 10px;
+  }
+  .farstar-business-stat .ant-card-body {
+    padding: 18px;
+  }
+  .farstar-shortcuts {
+    inline-size: 100%;
+  }
+  .farstar-shortcuts .ant-btn {
+    flex: 1;
+  }
+}
+.farstar-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 32px;
+  border-block-end: 1px solid var(--ant-color-border-secondary);
+  background: var(--ant-color-bg-container);
+}
+.farstar-page-title small {
+  display: block;
+  color: var(--ant-color-text-secondary);
+  font-size: 10px;
+  letter-spacing: 2px;
+  direction: ltr;
+}
+.farstar-page-title h1 {
+  font-size: 21px;
+  font-weight: 650;
+  margin: 4px 0 0;
+  color: var(--ant-color-text);
+}
+.farstar-topbar kbd {
+  margin-inline-start: 12px;
+  font-size: 10px;
+  padding: 3px 6px;
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 5px;
+  direction: ltr;
+}
+body .farstar-workspace > .ant-layout {
+  min-block-size: calc(100dvh - 98px);
+  min-inline-size: 0;
+  background: transparent;
+}
+body .farstar-workspace .content-shell {
+  max-inline-size: 1600px;
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding: 28px 32px;
+  margin-inline: auto;
+}
+body .farstar-workspace .content-area {
+  min-inline-size: 0;
+  padding: 0;
+}
+body .farstar-workspace .summary-card {
+  padding: 0;
+}
+body .farstar-workspace .ant-card {
+  border-radius: 16px;
+}
+body .farstar-workspace .ant-table {
+  border-radius: 14px;
+}
+body .farstar-workspace .ant-table-thead > tr > th {
+  background: var(--ant-color-fill-quaternary);
+}
+body .farstar-workspace .ov-vitals {
+  gap: 16px;
+}
+body .farstar-workspace .ov-rule {
+  background: var(--ant-color-border-secondary);
+}
+@media (max-width: 1100px) {
+  body .farstar-workspace .content-shell {
+    padding: 22px;
+  }
+}
+@media (max-width: 800px) {
+  .farstar-topbar {
+    padding: 16px;
+    padding-inline-start: 64px;
+    min-block-size: 78px;
+  }
+  .farstar-page-title h1 {
+    font-size: 17px;
+  }
+  .farstar-search-label,
+  .farstar-topbar kbd {
+    display: none;
+  }
+  body .farstar-workspace .content-shell {
+    padding: 18px 14px;
+  }
 }
 body.light [class$='-page'] {
   --bg-page: #f5f6f8;
@@ -30,27 +196,9 @@ body .ant-table-tbody > tr > td {
 body .ant-btn-primary {
   box-shadow: none;
 }
-body .sider-brand {
-  height: 76px;
-}
-body .brand-text {
-  letter-spacing: 2px;
-  font-size: 15px;
-  font-weight: 700;
-}
-body .ant-sidebar > .ant-layout-sider {
-  border-inline-end: 1px solid var(--ant-color-border-secondary);
-}
-body .ant-sidebar:not(.sidebar-pinned) > .ant-layout-sider:not(.ant-layout-sider-collapsed) {
-  box-shadow: 3px 0 15px #00000008;
-}
-body .sider-nav .ant-menu-item {
-  margin-block: 6px;
-  border-radius: 8px;
-}
 body .ant-menu-light .ant-menu-item-selected {
-  background: #edf4f2;
-  color: #23766b;
+  background: #ecf1ff;
+  color: #245dff;
 }
 body .index-page .ant-statistic-title {
   font-size: 12px;

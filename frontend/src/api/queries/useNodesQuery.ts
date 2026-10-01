@@ -31,6 +31,10 @@ export function useNodesQuery() {
   const query = useQuery({
     queryKey: keys.nodes.list(),
     queryFn: fetchNodes,
+    refetchInterval: (state) =>
+      state.state.data?.some((node) => ['pending', 'running'].includes(node.provisionStatus ?? ''))
+        ? 3000
+        : false,
   });
 
   const nodes = useMemo(() => query.data ?? [], [query.data]);
