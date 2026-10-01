@@ -201,8 +201,15 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: frontend
       - name: Test
-        run: npm test
+        run: npm test -- --reporter=default --reporter=json --outputFile=/tmp/farstar-frontend-tests.json
         working-directory: frontend
+      - name: Preserve failed frontend test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-test-diagnostics
+          path: /tmp/farstar-frontend-tests.json
+          if-no-files-found: ignore
       - name: Build
         run: npm run build
         working-directory: frontend
