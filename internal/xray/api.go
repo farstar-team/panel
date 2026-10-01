@@ -846,6 +846,7 @@ func (x *XrayAPI) GetOnlineUsers() ([]OnlineUser, error) {
 	}
 
 	users := make([]OnlineUser, 0, len(resp.GetUsers()))
+	byEmail := make(map[string]int)
 	for _, u := range resp.GetUsers() {
 		if u == nil || u.GetEmail() == "" {
 			continue
@@ -858,7 +859,13 @@ func (x *XrayAPI) GetOnlineUsers() ([]OnlineUser, error) {
 			ips = append(ips, OnlineIP{IP: entry.GetIp(), LastSeen: entry.GetLastSeen()})
 		}
 		_, email := ParseMeterEmail(u.GetEmail())
-		users = append(users, OnlineUser{Email: email, IPs: ips})
+		index, found := byEmail[email]
+		if !found { byEmail[email] = len(users); users = append(users, OnlineUser{Email: email, IPs: ips}); continue }
+		for _, ip := range ips {
+			matched := false
+			for j := range users[index].IPs { if users[index].IPs[j].IP == ip.IP { users[index].IPs[j].LastSeen = max(users[index].IPs[j].LastSeen, ip.LastSeen); matched = true; break } }
+			if !matched { users[index].IPs = append(users[index].IPs, ip) }
+		}
 	}
 	return users, nil
 }

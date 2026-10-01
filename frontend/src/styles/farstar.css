@@ -16,3 +16,8 @@ body .ant-menu-light .ant-menu-item-selected { background: #edf4f2; color: #2376
 body .index-page .ant-statistic-title { font-size: 12px; }
 body .index-page .ant-statistic-content { font-size: 24px; font-weight: 600; }
 @media (max-width: 720px) { body .content-shell { padding: 18px 14px; } }
+body.light .login-app { background: #f5f6f8; }
+body .login-app::before, body .login-app::after, body .login-content::before, body .login-content::after, body .login-wrapper::before, body .login-wrapper::after { display: none; }
+body .login-app .login-card { box-shadow: none; border-radius: 16px; }
+body.light .login-app .login-card { border: 1px solid #dfe5e3; background: #fff; }
+body .login-app .brand-name { letter-spacing: 3px; color: #23766b; background: none; -webkit-text-fill-color: currentColor; }

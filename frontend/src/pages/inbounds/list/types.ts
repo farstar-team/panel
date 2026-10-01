@@ -22,6 +22,7 @@ export type ProtocolFlags = {
 };
 
 export interface DBInboundRecord extends ProtocolFlags {
+  trafficMultiplier?: number;
   id: number;
   enable: boolean;
   remark: string;

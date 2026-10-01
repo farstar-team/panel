@@ -79,6 +79,8 @@ func (s *StoreService) Receipt(tgID, chatID int64, messageID int) (*model.StoreO
 }
 
 func (s *StoreService) Cancel(tgID int64, orderID int) error {
+	storeMutex.Lock()
+	defer storeMutex.Unlock()
 	result := database.GetDB().Model(&model.StoreOrder{}).Where("id = ? AND tg_id = ? AND status = ?", orderID, tgID, "pending").Update("status", "cancelled")
 	if result.Error != nil { return result.Error }
 	if result.RowsAffected != 1 { return errors.New("سفارش قابل لغو نیست") }

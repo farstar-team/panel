@@ -2,10 +2,12 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
 
 func seedVlessInbound(t *testing.T, tag string, port int, clients []model.Client) {
@@ -100,7 +102,8 @@ func TestGetXrayConfig_EnabledClientsStillEmitted(t *testing.T) {
 	if !ok {
 		t.Fatalf("client entry must be an object, got %T", list[0])
 	}
-	if entry["email"] != "live@x" {
+	_, emittedEmail := xray.ParseMeterEmail(fmt.Sprint(entry["email"]))
+	if emittedEmail != "live@x" {
 		t.Errorf("wrong client emitted: %#v", entry)
 	}
 	if entry["id"] != "22222222-2222-2222-2222-222222222222" {

@@ -51,7 +51,7 @@ const DONATE_URL = 'https://donate.sanaei.dev/';
 // The palette listens for Ctrl as well as Cmd, so the chip must not show a
 // Mac glyph to the Linux and Windows operators who are most of this panel's.
 const SHORTCUT_MODIFIER = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? '⌘' : 'Ctrl';
-const DOCS_URL = 'https://docs.sanaei.dev/';
+const DOCS_URL = 'https://github.com/farstar-team/panel/blob/main/docs/FARSTAR_FA.md';
 const REPO_URL = 'https://github.com/farstar-team/panel';
 const LOGOUT_KEY = '__logout__';
 const RAIL_WIDTH = 72;

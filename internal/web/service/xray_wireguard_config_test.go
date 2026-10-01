@@ -3,10 +3,12 @@ package service
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
 
 func wgTestSecretKey() string {
@@ -185,7 +187,8 @@ func TestGetXrayConfigWireGuardDisabledClientExcluded(t *testing.T) {
 	if len(peers) != 1 {
 		t.Fatalf("expected 1 enabled peer, got %d: %v", len(peers), peers)
 	}
-	if peers[0]["email"] != "on@wg.test" {
+	_, emittedEmail := xray.ParseMeterEmail(fmt.Sprint(peers[0]["email"]))
+	if emittedEmail != "on@wg.test" {
 		t.Errorf("wrong peer kept: %v", peers[0])
 	}
 }

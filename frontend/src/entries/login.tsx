@@ -8,6 +8,7 @@ import { readyI18n } from '@/i18n/react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { QueryProvider } from '@/api/QueryProvider';
 import LoginPage from '@/pages/login/LoginPage';
+import '@/styles/farstar.css';
 
 setupHttp();
 applyDocumentTitle();
