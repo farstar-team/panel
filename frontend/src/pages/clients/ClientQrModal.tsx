@@ -129,7 +129,7 @@ function SubscriptionQrPresentation({
         onChange={onVariantChange}
       />
       {variant === 'standard' ? (
-        <QrPanel value={standardLink} remark={remark} />
+        <QrPanel value={standardLink} remark={remark} showValue />
       ) : !happLinkEnabled ? (
         <Empty
           image={<LockOutlined aria-hidden style={{ fontSize: 40, opacity: 0.45 }} />}

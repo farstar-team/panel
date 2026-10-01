@@ -71,6 +71,17 @@ function qrGeometry(value: string): { viewBox: string; foreground: string } {
 }
 
 describe('QrPanel dense AmneziaWG config', () => {
+  it('shows the exact selectable subscription URL alongside its real QR', () => {
+    const link = 'https://example.com/sub/customer-test';
+    const { getByRole, container } = render(
+      <QrPanel value={link} remark="Subscription" showValue />,
+    );
+    const field = getByRole('textbox', { name: 'Subscription' }) as HTMLTextAreaElement;
+    expect(field.value).toBe(link);
+    expect(field.readOnly).toBe(true);
+    expect(container.querySelector('.qr-code svg')).not.toBeNull();
+  });
+
   it('keeps the complete 3.1 config readable across the DisableCookies QR boundary', () => {
     const complete = awgConfig(true);
     const withoutDisableCookies = awgConfig(false);
