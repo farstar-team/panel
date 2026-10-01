@@ -1,0 +1,14 @@
+{
+  "name": "farstar-panel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FARSTAR PANEL - Persian RTL operator dashboard for Xray/3x-ui compatible deployments",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

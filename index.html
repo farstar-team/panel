@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07111f" />
+    <meta name="description" content="FARSTAR PANEL — داشبورد گرافیکی مدیریت نود، کاربران، ترافیک و سابسکریپشن" />
+    <title>FARSTAR PANEL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand-row">
+          <div class="brand-mark"><span>F</span></div>
+          <div>
+            <div class="brand-name">FARSTAR</div>
+            <div class="brand-caption">CONTROL CENTER</div>
+          </div>
+          <button class="icon-btn mobile-close" data-action="close-sidebar" aria-label="بستن">×</button>
+        </div>
+        <div class="sidebar-label">مدیریت اصلی</div>
+        <nav class="nav-list" id="nav-list"></nav>
+        <div class="sidebar-label lower-label">سیستم</div>
+        <nav class="nav-list" id="system-nav"></nav>
+        <div class="sidebar-bottom">
+          <div class="mini-status"><span class="status-dot"></span><span>همه سرویس‌ها فعال</span></div>
+          <div class="version-row"><span>FARSTAR v0.1</span><span class="tiny-pill">DEMO</span></div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="topbar-right">
+            <button class="icon-btn menu-trigger" data-action="open-sidebar" aria-label="منو">☰</button>
+            <div class="breadcrumb"><span>FARSTAR</span><b>/</b><strong id="breadcrumb-title">داشبورد</strong></div>
+          </div>
+          <div class="topbar-actions">
+            <label class="search-box"><span>⌕</span><input id="global-search" placeholder="جستجو در کاربران و اینباندها..." /></label>
+            <button class="icon-btn theme-toggle" data-action="toggle-theme" title="تغییر تم">☼</button>
+            <button class="icon-btn notification-btn" data-action="open-notifications" title="اعلان‌ها">♢<i>3</i></button>
+            <div class="profile-chip"><div class="avatar">SA</div><div><b>سجاد</b><small>مدیر سیستم</small></div><span class="chevron">⌄</span></div>
+          </div>
+        </header>
+
+        <section class="page" id="page"></section>
+      </main>
+    </div>
+    <div id="toast-stack" class="toast-stack"></div>
+    <div id="modal-root"></div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
