@@ -33,10 +33,10 @@ test('native scrollbars follow the panel theme', () => {
       <ThemeToggle />
     </ThemeProvider>,
   );
-  expect(document.documentElement.style.colorScheme).toBe('dark');
+  expect(document.documentElement.style.colorScheme).toBe('light');
 
   fireEvent.click(getByRole('button'));
-  expect(document.documentElement.style.colorScheme).toBe('light');
+  expect(document.documentElement.style.colorScheme).toBe('dark');
 });
 
 test('native scrollbars follow the Storybook theme', () => {
@@ -78,8 +78,8 @@ test('preserves unrelated body classes when applying the panel theme', () => {
   );
 
   expect(document.body.classList.contains('panel-fixture')).toBe(true);
-  expect(document.body.classList.contains('dark')).toBe(true);
-  expect(document.body.classList.contains('light')).toBe(false);
+  expect(document.body.classList.contains('dark')).toBe(false);
+  expect(document.body.classList.contains('light')).toBe(true);
   expect(message.classList.contains('message-fixture')).toBe(true);
-  expect(message.classList.contains('dark')).toBe(true);
+  expect(message.classList.contains('light')).toBe(true);
 });

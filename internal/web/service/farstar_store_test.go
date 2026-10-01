@@ -1,11 +1,12 @@
 package service
 
 import (
+	"path/filepath"
+	"testing"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"path/filepath"
-	"testing"
 )
 
 func TestFarstarStoreSnapshotsPriceAndProtectsOwnership(t *testing.T) {
@@ -88,6 +89,9 @@ func TestFarstarStoreDeliveryAndRenewalAreIdempotent(t *testing.T) {
 	if _, err := s.NewOrder(456, 1, order.Email); err == nil {
 		t.Fatal("other user's renewal accepted")
 	}
+	if err := database.GetDB().Model(&model.ClientRecord{}).Where("id = ?", rec.Id).Update("limit_hwid", 3).Error; err != nil {
+		t.Fatal(err)
+	}
 	renew, err := s.NewOrder(123, 1, order.Email)
 	if err != nil {
 		t.Fatal(err)
@@ -102,7 +106,7 @@ func TestFarstarStoreDeliveryAndRenewalAreIdempotent(t *testing.T) {
 		t.Fatal(err)
 	}
 	after := lookupClientRecord(t, order.Email)
-	if after.TotalGB != 20<<30 || after.ExpiryTime != rec.ExpiryTime+30*86400000 || after.SubID != rec.SubID {
+	if after.TotalGB != 20<<30 || after.ExpiryTime != rec.ExpiryTime+30*86400000 || after.SubID != rec.SubID || after.LimitHwid != 3 {
 		t.Fatalf("renewal changed more than once: %+v", after)
 	}
 }

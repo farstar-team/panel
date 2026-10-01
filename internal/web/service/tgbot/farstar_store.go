@@ -17,7 +17,7 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
-const storeHelp = "<b>فروشگاه FARSTAR</b>\n/shop فروشگاه\n/my سرویس‌ها و سفارش‌های من\n\n<b>دستورهای مدیر</b>\n/plan نام_پلن قیمت_تومان حجم_GB روز\n/plan_off شماره\n/payment متن روش پرداخت\n/support https://t.me/username\n/sales on یا off\n/orders سفارش‌های منتظر بررسی\n/approve شماره\n/reject شماره\n\nفقط پس از بررسی واقعی واریز، پرداخت را تأیید کنید."
+const storeHelp = "<b>فروشگاه FARSTAR</b>\n/shop فروشگاه\n/my سرویس\u200cها و سفارش\u200cهای من\n\n<b>دستورهای مدیر</b>\n/plan نام_پلن قیمت_تومان حجم_GB روز\n/plan_off شماره\n/payment متن روش پرداخت\n/support https://t.me/username\n/sales on یا off\n/orders سفارش\u200cهای منتظر بررسی\n/approve شماره\n/reject شماره\n\nفقط پس از بررسی واقعی واریز، پرداخت را تأیید کنید."
 
 func (t *Tgbot) handleStoreCommand(message *telego.Message, command string, args []string, isAdmin bool) bool {
 	s := &service.StoreService{}
@@ -32,7 +32,7 @@ func (t *Tgbot) handleStoreCommand(message *telego.Message, command string, args
 		return false
 	}
 	if chatID != message.From.ID {
-		t.SendMsgToTgbot(chatID, "فروشگاه فقط در گفت‌وگوی خصوصی فعال است.")
+		t.SendMsgToTgbot(chatID, "فروشگاه فقط در گفت\u200cوگوی خصوصی فعال است.")
 		return true
 	}
 	if command == "shop" {
@@ -134,7 +134,7 @@ func (t *Tgbot) storePlans(chatID int64, renewClientID int) {
 	s := &service.StoreService{}
 	plans, err := s.Plans()
 	if err != nil {
-		t.SendMsgToTgbot(chatID, "دریافت پلن‌ها ناموفق بود.")
+		t.SendMsgToTgbot(chatID, "دریافت پلن\u200cها ناموفق بود.")
 		return
 	}
 	rows := [][]telego.InlineKeyboardButton{}
@@ -142,17 +142,17 @@ func (t *Tgbot) storePlans(chatID int64, renewClientID int) {
 		label := fmt.Sprintf("%s • %d GB • %d روز • %d تومان", plan.Name, plan.QuotaBytes/(1<<30), plan.Days, plan.Price)
 		rows = append(rows, tu.InlineKeyboardRow(tu.InlineKeyboardButton(label).WithCallbackData(fmt.Sprintf("shop:buy:%d:%d", plan.ID, renewClientID))))
 	}
-	rows = append(rows, tu.InlineKeyboardRow(tu.InlineKeyboardButton("سرویس‌ها و سفارش‌های من").WithCallbackData("shop:my")))
+	rows = append(rows, tu.InlineKeyboardRow(tu.InlineKeyboardButton("سرویس\u200cها و سفارش\u200cهای من").WithCallbackData("shop:my")))
 	if support := s.Config().SupportURL; support != "" {
 		rows = append(rows, tu.InlineKeyboardRow(tu.InlineKeyboardButton("پشتیبانی").WithURL(support)))
 	}
-	t.SendMsgToTgbot(chatID, "<b>FARSTAR · اتصال ساده</b>\nپلن خود را انتخاب کنید. پس از تأیید رسید، لینک اشتراک و QR تحویل می‌گیرید.\nمصرف اینباندهای ویژه بر اساس ضریب اعلام‌شده محاسبه می‌شود.", tu.InlineKeyboard(rows...))
+	t.SendMsgToTgbot(chatID, "<b>FARSTAR · اتصال ساده</b>\nپلن خود را انتخاب کنید. پس از تأیید رسید، لینک اشتراک و QR تحویل می\u200cگیرید.\nمصرف اینباندهای ویژه بر اساس ضریب اعلام\u200cشده محاسبه می\u200cشود.", tu.InlineKeyboard(rows...))
 }
 
 func (t *Tgbot) storeAccount(chatID int64) {
 	records, err := t.clientService.GetRecordsByTgID(chatID)
 	if err != nil {
-		t.SendMsgToTgbot(chatID, "دریافت سرویس‌ها ناموفق بود.")
+		t.SendMsgToTgbot(chatID, "دریافت سرویس\u200cها ناموفق بود.")
 		return
 	}
 	for _, rec := range records {
@@ -165,7 +165,7 @@ func (t *Tgbot) storeAccount(chatID int64) {
 func (t *Tgbot) storeOrders(chatID, owner int64) {
 	orders, err := (&service.StoreService{}).Orders(owner)
 	if err != nil {
-		t.SendMsgToTgbot(chatID, "دریافت سفارش‌ها ناموفق بود.")
+		t.SendMsgToTgbot(chatID, "دریافت سفارش\u200cها ناموفق بود.")
 		return
 	}
 	if len(orders) == 0 {
@@ -195,7 +195,7 @@ func (t *Tgbot) handleStoreCallback(query *telego.CallbackQuery) bool {
 	actor := query.From.ID
 	chatID := query.Message.GetChat().ID
 	if actor != chatID {
-		t.sendCallbackAnswerTgBot(query.ID, "فقط گفت‌وگوی خصوصی")
+		t.sendCallbackAnswerTgBot(query.ID, "فقط گفت\u200cوگوی خصوصی")
 		return true
 	}
 	parts := strings.Split(query.Data, ":")
@@ -279,7 +279,7 @@ func (t *Tgbot) handleStoreReceipt(message *telego.Message) bool {
 		cancel()
 		t.SendMsgToTgbot(admin, fmt.Sprintf("<b>بررسی پرداخت #%d</b>\nکاربر: %d\nپلن: %s\nمبلغ: %d تومان\nقبل از تأیید، واریز واقعی را بررسی کنید.", order.ID, order.TgID, html.EscapeString(order.PlanName), order.Price), storeReviewKeyboard(order.ID))
 	}
-	t.SendMsgToTgbot(message.Chat.ID, "رسید ثبت شد؛ نتیجه پس از بررسی مدیر اعلام می‌شود.")
+	t.SendMsgToTgbot(message.Chat.ID, "رسید ثبت شد؛ نتیجه پس از بررسی مدیر اعلام می\u200cشود.")
 	return true
 }
 
@@ -307,7 +307,7 @@ func (t *Tgbot) storeDecision(admin int64, id int, approve bool) {
 		t.xrayService.SetToNeedRestart()
 	}
 	if err != nil {
-		t.SendMsgToTgbot(admin, "تحویل ناموفق؛ سفارش محفوظ است و می‌توانید دوباره تأیید کنید.\n"+html.EscapeString(err.Error()))
+		t.SendMsgToTgbot(admin, "تحویل ناموفق؛ سفارش محفوظ است و می\u200cتوانید دوباره تأیید کنید.\n"+html.EscapeString(err.Error()))
 		return
 	}
 	t.SendMsgToTgbot(admin, fmt.Sprintf("سفارش #%d تحویل شد.", id))

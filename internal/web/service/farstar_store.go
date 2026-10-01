@@ -84,7 +84,7 @@ func (s *StoreService) Receipt(tgID, chatID int64, messageID int) (*model.StoreO
 	var order model.StoreOrder
 	db := database.GetDB()
 	if err := db.Where("tg_id = ? AND status = ?", tgID, "pending").Order("id DESC").First(&order).Error; err != nil {
-		return nil, errors.New("سفارش پرداخت‌نشده‌ای ندارید")
+		return nil, errors.New("سفارش پرداخت\u200cنشده\u200cای ندارید")
 	}
 	if order.CreatedAt < time.Now().Add(-24*time.Hour).UnixMilli() {
 		return nil, errors.New("مهلت سفارش تمام شده؛ دوباره سفارش بدهید")
@@ -192,12 +192,16 @@ func (s *StoreService) Approve(orderID int, adminID int64, inboundSvc *InboundSe
 	var restart bool
 	var err error
 	if order.Renew {
+		rec, getErr := clientSvc.GetRecordByEmail(nil, order.Email)
+		if getErr != nil || rec.TgID != order.TgID {
+			return nil, false, errors.New("سرویس تمدیدی یافت نشد")
+		}
 		_, client, getErr := inboundSvc.GetClientByEmail(order.Email)
 		if getErr != nil || client.TgID != order.TgID {
 			return nil, false, errors.New("سرویس تمدیدی یافت نشد")
 		}
 		client.TotalGB, client.ExpiryTime, client.Enable = order.TargetQuota, order.TargetExpiry, true
-		restart, err = clientSvc.UpdateByEmail(inboundSvc, order.Email, *client, 0)
+		restart, err = clientSvc.UpdateByEmail(inboundSvc, order.Email, *client, rec.LimitHwid)
 	} else {
 		var ids []int
 		if err := json.Unmarshal([]byte(order.InboundIDs), &ids); err != nil {
