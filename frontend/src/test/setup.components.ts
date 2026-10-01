@@ -1,7 +1,8 @@
 import { afterEach, vi } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import { act, cleanup } from '@testing-library/react';
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { message, notification } from 'antd';
 
 import enUS from '../../../internal/web/translation/en-US.json';
 
@@ -81,20 +82,17 @@ if (!i18next.isInitialized) {
 }
 
 afterEach(async () => {
-  cleanup();
-  document.body.innerHTML = '';
-  /*
-   * React 19 defers passive-effect flushes onto a macrotask (setImmediate),
-   * whose callback reads `window.event`. If one is still queued when vitest
-   * tears down the jsdom environment, it fires after `window` is gone and
-   * throws "window is not defined". Drain a few macrotask ticks here so any
-   * pending callback runs while `window` still exists. Several ticks are used
-   * because a microtask resolving mid-drain (rc-trigger/AntD) can queue a new
-   * one behind the first.
-   */
+  // Async act drains React's scheduled effects before jsdom destroys window.
+  await act(async () => {
+    message.destroy();
+    notification.destroy();
+    cleanup();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
   for (let i = 0; i < 3; i += 1) {
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
+  document.body.innerHTML = '';
 });
 
 import { HttpUtil, Msg } from '@/utils';
