@@ -11,6 +11,7 @@ import { setupHttp } from '@/api/http-init';
 import { readyI18n } from '@/i18n/react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { QueryProvider } from '@/api/QueryProvider';
+import PanelLocaleProvider from '@/layouts/PanelLocaleProvider';
 import { router } from '@/routes';
 
 setupHttp();
@@ -24,11 +25,13 @@ readyI18n().then(() => {
   const root = document.getElementById('app');
   if (root) {
     createRoot(root).render(
-      <ThemeProvider>
-        <QueryProvider>
-          <RouterProvider router={router} />
-        </QueryProvider>
-      </ThemeProvider>,
+      <PanelLocaleProvider>
+        <ThemeProvider>
+          <QueryProvider>
+            <RouterProvider router={router} />
+          </QueryProvider>
+        </ThemeProvider>
+      </PanelLocaleProvider>,
     );
   }
 });

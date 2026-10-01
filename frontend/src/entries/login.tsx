@@ -7,6 +7,7 @@ import { applyDocumentTitle } from '@/utils';
 import { readyI18n } from '@/i18n/react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { QueryProvider } from '@/api/QueryProvider';
+import PanelLocaleProvider from '@/layouts/PanelLocaleProvider';
 import LoginPage from '@/pages/login/LoginPage';
 import '@/styles/farstar.css';
 
@@ -22,11 +23,13 @@ readyI18n().then(() => {
   const root = document.getElementById('app');
   if (root) {
     createRoot(root).render(
-      <ThemeProvider>
-        <QueryProvider>
-          <LoginPage />
-        </QueryProvider>
-      </ThemeProvider>,
+      <PanelLocaleProvider>
+        <ThemeProvider>
+          <QueryProvider>
+            <LoginPage />
+          </QueryProvider>
+        </ThemeProvider>
+      </PanelLocaleProvider>,
     );
   }
 });
