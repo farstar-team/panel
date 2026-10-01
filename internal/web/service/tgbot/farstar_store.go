@@ -9,12 +9,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"github.com/skip2/go-qrcode"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
 const storeHelp = "<b>فروشگاه FARSTAR</b>\n/shop فروشگاه\n/my سرویس\u200cها و سفارش\u200cهای من\n\n<b>دستورهای مدیر</b>\n/plan نام_پلن قیمت_تومان حجم_GB روز\n/plan_off شماره\n/payment متن روش پرداخت\n/support https://t.me/username\n/sales on یا off\n/orders سفارش\u200cهای منتظر بررسی\n/approve شماره\n/reject شماره\n\nفقط پس از بررسی واقعی واریز، پرداخت را تأیید کنید."
